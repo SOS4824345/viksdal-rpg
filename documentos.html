@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documentos, Viksdal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Courier+Prime:wght@400;700&family=Kalam:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f2ede4;
+    --paper-dark: #e0d8c8;
+    --ink: #1a1410;
+    --ink-faded: #4a3f32;
+    --blood: #6b1a1a;
+    --blood-light: #8b2020;
+    --rust: #8b4513;
+    --bg: #0d0b08;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    min-height: 100vh;
+    font-family: 'IM Fell English', serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at 20% 50%, rgba(30,10,5,0.6) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 50%, rgba(10,15,30,0.4) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 50px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header h1 {
+    font-family: 'Courier Prime', monospace;
+    color: #3a3028;
+    font-size: 0.75em;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    opacity: 0.5;
+  }
+
+  .waiting {
+    color: #2a2520;
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.8em;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.3;
+    margin-top: 60px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    animation: pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.5; }
+  }
+
+  /* CONTAINER DE DOCUMENTOS */
+  .docs-container {
+    display: flex;
+    flex-direction: column;
+    gap: 70px;
+    width: 100%;
+    max-width: 680px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ANIMAÇÃO DE ENTRADA */
+  .doc-wrapper {
+    display: none;
+    animation: revealDoc 1.2s ease forwards;
+  }
+
+  .doc-wrapper.visible {
+    display: block;
+  }
+
+  @keyframes revealDoc {
+    0% { opacity: 0; transform: translateY(30px) scale(0.97); filter: blur(4px); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  }
+
+  /* PAPEL BASE */
+  .paper {
+    position: relative;
+    background: var(--paper);
+    padding: 40px 45px;
+    box-shadow:
+      0 2px 4px rgba(0,0,0,0.2),
+      0 8px 20px rgba(0,0,0,0.4),
+      0 20px 60px rgba(0,0,0,0.3),
+      inset 0 0 60px rgba(0,0,0,0.04);
+  }
+
+  .paper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  /* DOCUMENTO 1, BÍBLIA */
+  .doc-biblia .paper {
+    background: #ede5d0;
+    border-left: 3px solid #8b6914;
+    transform: rotate(-0.5deg);
+  }
+
+  .doc-biblia .paper::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    width: 60px;
+    height: 40px;
+    background: radial-gradient(ellipse, rgba(107,26,26,0.4) 0%, rgba(107,26,26,0.1) 50%, transparent 75%);
+    border-radius: 50%;
+    transform: rotate(15deg);
+    pointer-events: none;
+  }
+
+  .biblia-blood-1 {
+    position: absolute;
+    bottom: 30px;
+    left: 25px;
+    width: 35px;
+    height: 20px;
+    background: radial-gradient(ellipse, rgba(107,26,26,0.35) 0%, rgba(107,26,26,0.08) 60%, transparent 80%);
+    border-radius: 50%;
+    transform: rotate(-8deg);
+  }
+
+  .biblia-blood-2 {
+    position: absolute;
+    top: 80px;
+    right: 15px;
+    width: 8px;
+    height: 8px;
+    background: rgba(107,26,26,0.4);
+    border-radius: 50%;
+    box-shadow: 12px 5px 0 rgba(107,26,26,0.2), -5px 18px 0 rgba(107,26,26,0.15);
+  }
+
+  .biblia-label {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.65em;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #8b6914;
+    margin-bottom: 20px;
+    display: block;
+    opacity: 0.7;
+  }
+
+  .biblia-title {
+    font-size: 1.3em;
+    font-weight: normal;
+    font-style: italic;
+    color: #2a1f0e;
+    margin-bottom: 25px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(139,105,20,0.3);
+    letter-spacing: 0.05em;
+  }
+
+  .biblia-verse {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+
+  .biblia-verse .num {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.75em;
+    color: #8b6914;
+    min-width: 18px;
+    padding-top: 3px;
+    opacity: 0.7;
+  }
+
+  .biblia-verse .text {
+    font-size: 1.05em;
+    color: #1e160a;
+  }
+
+  .biblia-verse.marked .text {
+    position: relative;
+  }
+
+  .biblia-verse.marked .text::after {
+    content: '';
+    position: absolute;
+    bottom: 1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(107,26,26,0.5);
+  }
+
+  /* DOCUMENTO 2, CARTA DE INGRID */
+  .doc-carta .paper {
+    background: #f0ebe0;
+    transform: rotate(0.8deg);
+    padding-bottom: 0;
+  }
+
+  .carta-lines {
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      transparent,
+      transparent 31px,
+      rgba(100,120,180,0.08) 31px,
+      rgba(100,120,180,0.08) 32px
+    );
+    background-position: 0 55px;
+    pointer-events: none;
+  }
+
+  .carta-margin {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 70px;
+    width: 1px;
+    background: rgba(180,100,100,0.15);
+    pointer-events: none;
+  }
+
+  .carta-text {
+    font-family: 'Kalam', cursive;
+    font-size: 1.05em;
+    line-height: 2em;
+    color: #1a1208;
+    position: relative;
+    padding-left: 20px;
+  }
+
+  .carta-text p {
+    margin-bottom: 0;
+  }
+
+  .carta-greeting {
+    margin-bottom: 10px;
+    font-size: 1.1em;
+  }
+
+  .carta-signature {
+    margin-top: 12px;
+    font-style: italic;
+    opacity: 0.8;
+  }
+
+  .carta-torn {
+    height: 45px;
+    position: relative;
+    overflow: hidden;
+    margin-top: 20px;
+  }
+
+  .carta-torn::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: -5px;
+    right: -5px;
+    height: 45px;
+    background: var(--bg);
+    clip-path: polygon(
+      0% 40%, 3% 20%, 6% 45%, 9% 15%, 12% 38%, 15% 10%, 18% 35%, 21% 18%,
+      24% 42%, 27% 22%, 30% 40%, 33% 12%, 36% 38%, 39% 20%, 42% 44%, 45% 18%,
+      48% 36%, 51% 8%, 54% 32%, 57% 16%, 60% 40%, 63% 22%, 66% 38%, 69% 12%,
+      72% 34%, 75% 18%, 78% 42%, 81% 20%, 84% 38%, 87% 14%, 90% 36%, 93% 20%,
+      96% 40%, 99% 22%, 101% 40%, 101% 101%, 0% 101%
+    );
+  }
+
+  .carta-torn::after {
+    content: '';
+    position: absolute;
+    bottom: 8px;
+    left: 0;
+    right: 0;
+    height: 15px;
+    background: linear-gradient(to bottom, rgba(160,140,110,0.2), transparent);
+    pointer-events: none;
+  }
+
+  /* DOCUMENTO 3, DIÁRIO */
+  .doc-diario .paper {
+    background: #ede8dc;
+    transform: rotate(-1.2deg);
+    border-left: 6px solid #6b5a3a;
+    padding-left: 50px;
+  }
+
+  .diario-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+  }
+
+  .diario-date {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.7em;
+    color: #7a6040;
+    letter-spacing: 0.15em;
+    opacity: 0.6;
+  }
+
+  .diario-text {
+    font-family: 'Kalam', cursive;
+    font-size: 1em;
+    line-height: 1.9em;
+    color: #1a1208;
+  }
+
+  .diario-text p {
+    margin-bottom: 8px;
+  }
+
+  .diario-text .cut-off {
+    display: inline;
+  }
+
+  .diario-torn-right {
+    position: absolute;
+    top: 30%;
+    right: -1px;
+    width: 40px;
+    height: 55%;
+    background: var(--bg);
+    clip-path: polygon(
+      100% 0%, 60% 5%, 80% 12%, 55% 18%, 75% 25%, 50% 30%,
+      70% 38%, 48% 44%, 72% 52%, 50% 58%, 68% 65%, 45% 72%,
+      65% 78%, 42% 84%, 60% 90%, 40% 96%, 100% 100%
+    );
+  }
+
+  .diario-torn-bottom {
+    height: 35px;
+    position: relative;
+    overflow: hidden;
+    margin-top: 15px;
+  }
+
+  .diario-torn-bottom::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: -5px;
+    right: -5px;
+    height: 35px;
+    background: var(--bg);
+    clip-path: polygon(
+      0% 50%, 4% 25%, 8% 52%, 12% 20%, 16% 48%, 20% 28%, 24% 55%,
+      28% 22%, 32% 50%, 36% 30%, 40% 52%, 44% 18%, 48% 45%,
+      52% 25%, 56% 52%, 60% 15%, 64% 42%, 68% 28%, 72% 50%,
+      76% 20%, 80% 46%, 84% 28%, 88% 52%, 92% 22%, 96% 48%,
+      100% 30%, 101% 101%, 0% 101%
+    );
+  }
+
+  /* DOCUMENTO 4, FRASCO */
+  .doc-frasco .paper {
+    background: #e8e0cc;
+    transform: rotate(1.5deg);
+    max-width: 320px;
+    margin: 0 auto;
+    padding: 30px 35px;
+    border: 1px solid rgba(139,105,20,0.3);
+  }
+
+  .frasco-wax {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 18px;
+    background: radial-gradient(ellipse, #8b1a1a 0%, #6b0e0e 70%);
+    border-radius: 50% 50% 40% 40%;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+  }
+
+  .frasco-wax::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 10px;
+    background: radial-gradient(ellipse, rgba(255,255,255,0.15), transparent);
+    border-radius: 50%;
+  }
+
+  .frasco-string {
+    position: absolute;
+    top: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(to right, transparent 10%, #5a4020 20%, #5a4020 80%, transparent 90%);
+    opacity: 0.5;
+  }
+
+  .frasco-text {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    text-align: center;
+    color: #1a1208;
+  }
+
+  .frasco-main {
+    font-size: 1.4em;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .frasco-sub {
+    font-size: 0.85em;
+    opacity: 0.5;
+    display: block;
+    font-family: 'Courier Prime', monospace;
+    font-style: normal;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .frasco-divider {
+    width: 80%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(139,105,20,0.4), transparent);
+    margin: 0 auto 16px;
+  }
+
+  .frasco-finnish {
+    font-size: 1.15em;
+    display: block;
+    text-align: center;
+    margin-bottom: 5px;
+  }
+
+  .frasco-translation {
+    font-size: 0.75em;
+    color: var(--blood);
+    display: block;
+    text-align: center;
+    font-style: italic;
+    opacity: 0;
+    transition: opacity 1s ease;
+    font-family: 'Courier Prime', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  .frasco-translation.show {
+    opacity: 0.7;
+  }
+
+  .frasco-hint {
+    font-size: 0.6em;
+    color: #7a6040;
+    text-align: center;
+    margin-top: 14px;
+    font-family: 'Courier Prime', monospace;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.4;
+    cursor: pointer;
+    display: block;
+    transition: opacity 0.3s;
+  }
+
+  .frasco-hint:hover {
+    opacity: 0.7;
+  }
+
+  /* STATUS DE CONEXÃO */
+  .status {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.65em;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #2a2520;
+    opacity: 0.3;
+    z-index: 100;
+  }
+
+  .status.connected { color: #3a5a3a; opacity: 0.4; }
+  .status.error { color: #5a2a2a; opacity: 0.5; }
+
+  /* LABEL DE LOCALIZAÇÃO */
+  .doc-location {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.6em;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #3a3028;
+    opacity: 0.35;
+    margin-bottom: 12px;
+    display: block;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Viksdal, Documentos</h1>
+</div>
+
+<div class="waiting" id="waiting-msg">aguardando documentos...</div>
+
+<div class="docs-container" id="docs-container">
+
+  <!-- BÍBLIA -->
+  <div class="doc-wrapper" id="doc-biblia">
+    <span class="doc-location">Igrejinha, banco do fundo</span>
+    <div class="doc-biblia">
+      <div class="paper">
+        <div class="biblia-blood-1"></div>
+        <div class="biblia-blood-2"></div>
+        <span class="biblia-label">Tradição Oral de Viksdal, compilada</span>
+        <h2 class="biblia-title">Éden · IV</h2>
+        <div class="biblia-verse"><span class="num">1.</span><span class="text">No princípio, a fome era grande.</span></div>
+        <div class="biblia-verse"><span class="num">2.</span><span class="text">E a fome disse: crescei.</span></div>
+        <div class="biblia-verse"><span class="num">3.</span><span class="text">O Jardim não tem mãos, mas planta. Não tem boca, mas alimenta. Não tem olhos, mas vê aquilo que ainda não nasceu.</span></div>
+        <div class="biblia-verse"><span class="num">4.</span><span class="text">E daquilo que a terra toca, a terra conhece.</span></div>
+        <div class="biblia-verse"><span class="num">5.</span><span class="text">Pois uma raiz não pergunta à flor se ela consente em florescer.</span></div>
+        <div class="biblia-verse"><span class="num">6.</span><span class="text">No início, Deus criou o Éden.</span></div>
+        <div class="biblia-verse marked"><span class="num">7.</span><span class="text">E o Éden criou à Deus.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARTA DE INGRID -->
+  <div class="doc-wrapper" id="doc-carta">
+    <span class="doc-location">Casa de Ingrid, livro de receitas</span>
+    <div class="doc-carta">
+      <div class="paper">
+        <div class="carta-lines"></div>
+        <div class="carta-margin"></div>
+        <div class="carta-text">
+          <p class="carta-greeting">Mannon,</p>
+          <p>Sei que você está brava comigo por não ter ido à sua exposição. Sei também que você não vai ligar primeiro. Então estou escrevendo.</p>
+          <p>Lembro quando você tinha oito anos e ficou três dias seguidos fotografando o quintal com aquela câmera descartável que te dei de aniversário. Você revelou o filme e eram quarenta fotos do mesmo gato. Você ficou furiosa comigo quando eu ri.</p>
+          <p>Ainda tenho essas fotos.</p>
+          <p>Cuide-se. Coma direito. Toma os seus remédios.</p>
+          <p class="carta-signature">Mãe</p>
+        </div>
+        <div class="carta-torn"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIÁRIO DE INGRID -->
+  <div class="doc-wrapper" id="doc-diario">
+    <span class="doc-location">Casa de Ingrid, embaixo do colchão</span>
+    <div class="doc-diario">
+      <div class="paper">
+        <div class="diario-torn-right"></div>
+        <div class="diario-header">
+          <span class="diario-date">sem data</span>
+          <span class="diario-date">diário pessoal</span>
+        </div>
+        <div class="diario-text">
+          <p>Lista de compras amanhã. Pão, manteiga, ervas para a prateleira.</p>
+          <p>O tempo está fechando. Provavelmente vai nevar essa semana.</p>
+          <p>Hoje sonhei com a árvore de novo. No sonho ela tinha raízes que chegavam até embaixo da cama e eu não conseguia<span class="cut-off">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></p>
+        </div>
+        <div class="diario-torn-bottom"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FRASCO DE ERVAS -->
+  <div class="doc-wrapper" id="doc-frasco">
+    <span class="doc-location">Casa de Ingrid, prateleira da cozinha</span>
+    <div class="doc-frasco">
+      <div class="paper">
+        <div class="frasco-wax"></div>
+        <div class="frasco-string"></div>
+        <div class="frasco-text">
+          <span class="frasco-sub">Viksdal, ervas secas</span>
+          <div class="frasco-divider"></div>
+          <span class="frasco-finnish">Juuri muistaa sinut.</span>
+          <span class="frasco-translation" id="frasco-translation">Senti saudades de você.</span>
+          <span class="frasco-hint" onclick="revealTranslation()">[ traduzir? ]</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="status" id="status-indicator">conectando...</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBCYLeM-kzt-ranLjPpJKerO1K-nF0U7_0",
+    authDomain: "viksdal-rpg.firebaseapp.com",
+    databaseURL: "https://viksdal-rpg-default-rtdb.firebaseio.com",
+    projectId: "viksdal-rpg",
+    storageBucket: "viksdal-rpg.firebasestorage.app",
+    messagingSenderId: "259939315702",
+    appId: "1:259939315702:web:b599846c0fb7ac48c6e1d7"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const statusEl = document.getElementById('status-indicator');
+  const waitingEl = document.getElementById('waiting-msg');
+
+  const docIds = ['biblia', 'carta', 'diario', 'frasco'];
+
+  function checkAnyVisible() {
+    const anyVisible = docIds.some(id => {
+      const el = document.getElementById('doc-' + id);
+      return el && el.classList.contains('visible');
+    });
+    waitingEl.style.display = anyVisible ? 'none' : 'block';
+  }
+
+  docIds.forEach(id => {
+    const r = ref(db, 'documentos/' + id + '/revealed');
+    onValue(r, (snap) => {
+      const revealed = snap.val();
+      const el = document.getElementById('doc-' + id);
+      if (!el) return;
+      if (revealed) {
+        el.classList.add('visible');
+      } else {
+        el.classList.remove('visible');
+      }
+      checkAnyVisible();
+    });
+  });
+
+  statusEl.textContent = 'conectado';
+  statusEl.className = 'status connected';
+
+  window.revealTranslation = function() {
+    document.getElementById('frasco-translation').classList.add('show');
+    document.querySelector('.frasco-hint').style.display = 'none';
+  };
+</script>
+</body>
+</html>
