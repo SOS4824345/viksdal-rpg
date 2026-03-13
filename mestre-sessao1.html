@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mestre, Sessão 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #090807;
+    --surface: #111009;
+    --surface2: #181510;
+    --border: #2a2318;
+    --border2: #3a3020;
+    --accent: #9b5a1a;
+    --accent2: #c47a2a;
+    --blood: #7a1a1a;
+    --blood2: #a02a2a;
+    --green: #1a3a1a;
+    --green2: #4a8a4a;
+    --blue: #1a2a3a;
+    --blue2: #4a7aaa;
+    --text: #c8bfb0;
+    --text2: #8a8070;
+    --text3: #4a4038;
+    --font-mono: 'Courier Prime', monospace;
+    --font-serif: 'IM Fell English', serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* LAYOUT */
+  .layout {
+    display: grid;
+    grid-template-columns: 220px 1fr 260px;
+    grid-template-rows: 48px 1fr;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    grid-column: 1 / -1;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border2);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 30px;
+  }
+
+  .topbar-title {
+    font-size: 0.7em;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--accent2);
+  }
+
+  .topbar-sep { color: var(--text3); }
+
+  .topbar-sub {
+    font-size: 0.65em;
+    letter-spacing: 0.2em;
+    color: var(--text3);
+    text-transform: uppercase;
+  }
+
+  .topbar-nav {
+    margin-left: auto;
+    display: flex;
+    gap: 4px;
+  }
+
+  .nav-btn {
+    padding: 5px 14px;
+    font-family: var(--font-mono);
+    font-size: 0.65em;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border: 1px solid var(--border2);
+    color: var(--text3);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .nav-btn:hover, .nav-btn.active {
+    border-color: var(--accent);
+    color: var(--accent2);
+  }
+
+  /* SIDEBAR ESQUERDA, CENAS */
+  .sidebar-left {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 16px 0;
+  }
+
+  .sidebar-label {
+    font-size: 0.6em;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 0 16px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .scene-item {
+    padding: 10px 16px;
+    cursor: pointer;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .scene-item:hover {
+    background: var(--surface2);
+    border-left-color: var(--border2);
+  }
+
+  .scene-item.active {
+    background: rgba(155,90,26,0.08);
+    border-left-color: var(--accent);
+  }
+
+  .scene-num {
+    font-size: 0.6em;
+    color: var(--text3);
+    min-width: 16px;
+    padding-top: 2px;
+  }
+
+  .scene-name {
+    font-size: 0.72em;
+    letter-spacing: 0.05em;
+    color: var(--text2);
+    line-height: 1.4;
+  }
+
+  .scene-item.active .scene-name { color: var(--text); }
+
+  .scene-tag {
+    font-size: 0.55em;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    display: block;
+    margin-top: 2px;
+  }
+
+  .scene-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 16px;
+  }
+
+  /* MAIN */
+  .main {
+    overflow-y: auto;
+    padding: 24px 28px;
+  }
+
+  /* PAINÉIS */
+  .panel {
+    display: none;
+  }
+
+  .panel.active { display: block; }
+
+  .panel-title {
+    font-size: 0.65em;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .panel-title::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    background: var(--accent);
+    transform: rotate(45deg);
+  }
+
+  /* BLOCO DE CENA */
+  .scene-block {
+    margin-bottom: 28px;
+  }
+
+  .scene-block-title {
+    font-size: 0.68em;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .scene-block-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .scene-body {
+    font-size: 0.78em;
+    line-height: 1.75;
+    color: var(--text2);
+  }
+
+  .scene-body p { margin-bottom: 8px; }
+
+  .scene-body strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .scene-body em {
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: var(--accent2);
+    font-size: 1.1em;
+  }
+
+  /* TAGS DE AÇÃO */
+  .tag {
+    display: inline-block;
+    font-size: 0.6em;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border: 1px solid;
+    margin-right: 6px;
+    margin-bottom: 4px;
+    vertical-align: middle;
+  }
+
+  .tag-photo { border-color: var(--accent); color: var(--accent2); }
+  .tag-san { border-color: var(--blood); color: var(--blood2); }
+  .tag-roll { border-color: var(--blue2); color: var(--blue2); }
+  .tag-item { border-color: var(--green2); color: var(--green2); }
+  .tag-lore { border-color: var(--text3); color: var(--text2); }
+
+  /* GRID DE ITENS */
+  .items-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .item-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 12px 14px;
+    transition: border-color 0.15s;
+  }
+
+  .item-card:hover { border-color: var(--border2); }
+
+  .item-icon {
+    font-size: 1.1em;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .item-name {
+    font-size: 0.72em;
+    letter-spacing: 0.1em;
+    color: var(--text);
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  .item-desc {
+    font-size: 0.67em;
+    color: var(--text3);
+    line-height: 1.5;
+  }
+
+  .item-stat {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 0.62em;
+    color: var(--blood2);
+    letter-spacing: 0.1em;
+  }
+
+  /* FICHA DE NPC */
+  .npc-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .npc-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 3px;
+  }
+
+  .npc-card.enemy::before { background: var(--blood); }
+  .npc-card.neutral::before { background: var(--accent); }
+  .npc-card.absent::before { background: var(--text3); }
+
+  .npc-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .npc-name {
+    font-size: 0.8em;
+    letter-spacing: 0.1em;
+    color: var(--text);
+    text-transform: uppercase;
+  }
+
+  .npc-role {
+    font-size: 0.62em;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+  }
+
+  .npc-stats {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 10px;
+  }
+
+  .npc-stat {
+    font-size: 0.65em;
+    color: var(--text3);
+  }
+
+  .npc-stat span {
+    color: var(--accent2);
+    font-weight: 700;
+  }
+
+  .npc-desc {
+    font-size: 0.7em;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  .npc-desc p { margin-bottom: 5px; }
+
+  /* MECÂNICAS */
+  .mech-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+  }
+
+  .mech-table th {
+    font-size: 0.6em;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text3);
+    text-align: left;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .mech-table td {
+    font-size: 0.7em;
+    color: var(--text2);
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .mech-table td:first-child { color: var(--text); }
+  .mech-table td .val { color: var(--accent2); font-weight: 700; }
+  .mech-table td .blood { color: var(--blood2); font-weight: 700; }
+
+  .mech-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+
+  .mech-box-title {
+    font-size: 0.62em;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .mech-box-body {
+    font-size: 0.7em;
+    color: var(--text2);
+    line-height: 1.65;
+  }
+
+  /* ALERTA */
+  .alert {
+    background: rgba(122,26,26,0.12);
+    border: 1px solid rgba(122,26,26,0.3);
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    font-size: 0.7em;
+    color: var(--blood2);
+    line-height: 1.6;
+  }
+
+  .alert strong { color: #c04040; }
+
+  /* SIDEBAR DIREITA */
+  .sidebar-right {
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  .quick-title {
+    font-size: 0.6em;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .quick-block {
+    margin-bottom: 20px;
+  }
+
+  .quick-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.68em;
+  }
+
+  .quick-row .k { color: var(--text2); }
+  .quick-row .v { color: var(--accent2); font-weight: 700; }
+  .quick-row .v.red { color: var(--blood2); }
+  .quick-row .v.green { color: var(--green2); }
+  .quick-row .v.blue { color: var(--blue2); }
+
+  .san-track {
+    margin-top: 14px;
+  }
+
+  .san-level {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 5px 8px;
+    margin-bottom: 3px;
+    font-size: 0.65em;
+    border-left: 2px solid var(--border);
+    color: var(--text3);
+  }
+
+  .san-level .num { min-width: 22px; color: var(--accent); font-weight: 700; }
+  .san-level.s1 { border-color: var(--blue2); color: var(--text2); }
+  .san-level.s2 { border-color: var(--accent); }
+  .san-level.s3 { border-color: #c07020; }
+  .san-level.s4 { border-color: var(--blood); }
+  .san-level.s5 { border-color: #600; color: #600; }
+
+  .quick-sep {
+    height: 1px;
+    background: var(--border);
+    margin: 14px 0;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); }
+
+  /* FOTO OPPORTUNITY */
+  .photo-op {
+    background: rgba(155,90,26,0.1);
+    border: 1px solid rgba(155,90,26,0.3);
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: 0.7em;
+    color: var(--accent2);
+    line-height: 1.6;
+  }
+
+  .photo-op strong { color: var(--accent2); }
+
+  .photo-layers {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .photo-layer {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    font-size: 0.95em;
+  }
+
+  .photo-layer .layer-name { color: var(--text2); min-width: 60px; }
+  .photo-layer .layer-cost { color: var(--blood2); min-width: 50px; }
+  .photo-layer .layer-desc { color: var(--text3); }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <span class="topbar-title">Viksdal, Mestre</span>
+    <span class="topbar-sep">/</span>
+    <span class="topbar-sub">Sessão 1, A Carta</span>
+    <div class="topbar-nav">
+      <button class="nav-btn active" onclick="showPanel('cenas')">Cenas</button>
+      <button class="nav-btn" onclick="showPanel('npcs')">NPCs</button>
+      <button class="nav-btn" onclick="showPanel('itens')">Itens</button>
+      <button class="nav-btn" onclick="showPanel('mecanicas')">Mecânicas</button>
+    </div>
+  </div>
+
+  <!-- SIDEBAR ESQUERDA -->
+  <div class="sidebar-left">
+    <span class="sidebar-label">Ordem da Sessão</span>
+
+    <div class="scene-item active" onclick="goScene(this, 'cena-apartamento')">
+      <span class="scene-num">01</span>
+      <div>
+        <span class="scene-name">Apartamento em Morret</span>
+        <span class="scene-tag">abertura, itens</span>
+      </div>
+    </div>
+
+    <div class="scene-item" onclick="goScene(this, 'cena-flashback')">
+      <span class="scene-num">02</span>
+      <div>
+        <span class="scene-name">Flashback no Ônibus</span>
+        <span class="scene-tag">memória jogável</span>
+      </div>
+    </div>
+
+    <div class="scene-item" onclick="goScene(this, 'cena-chegada')">
+      <span class="scene-num">03</span>
+      <div>
+        <span class="scene-name">Chegada em Viksdal</span>
+        <span class="scene-tag">exploração livre</span>
+      </div>
+    </div>
+
+    <div class="scene-item" onclick="goScene(this, 'cena-igrejinha')">
+      <span class="scene-num">04</span>
+      <div>
+        <span class="scene-name">A Igrejinha</span>
+        <span class="scene-tag">lore, documento</span>
+      </div>
+    </div>
+
+    <div class="scene-item" onclick="goScene(this, 'cena-arvore')">
+      <span class="scene-num">05</span>
+      <div>
+        <span class="scene-name">O Cruzamento</span>
+        <span class="scene-tag">oportunidade de foto</span>
+      </div>
+    </div>
+
+    <div class="scene-divider"></div>
+
+    <div class="scene-item" onclick="goScene(this, 'cena-casa1')">
+      <span class="scene-num">06</span>
+      <div>
+        <span class="scene-name">Casa de Ingrid, 1º Andar</span>
+        <span class="scene-tag">itens, exploração</span>
+      </div>
+    </div>
+
+    <div class="scene-item" onclick="goScene(this, 'cena-casa2')">
+      <span class="scene-num">07</span>
+      <div>
+        <span class="scene-name">Casa de Ingrid, 2º Andar</span>
+        <span class="scene-tag">diário, encontro</span>
+      </div>
+    </div>
+
+    <div class="scene-item" onclick="goScene(this, 'cena-impostora')">
+      <span class="scene-num">08</span>
+      <div>
+        <span class="scene-name">A Impostora</span>
+        <span class="scene-tag">combate, fim de sessão</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- PAINEL CENAS -->
+    <div class="panel active" id="panel-cenas">
+
+      <div id="cena-apartamento" class="scene-block">
+        <div class="scene-block-title">01, Apartamento em Morret</div>
+        <div class="scene-body">
+          <p><strong>Tom:</strong> desespero cotidiano, silêncio de apartamento vazio. Música: Poison Tree, Grouper.</p>
+          <p><strong>Ponto de entrada:</strong> Mannon acorda ou está acordada, os remédios estão acabando. A passagem de ônibus está na estante, ela não lembra de ter comprado.</p>
+          <p>Deixa Alice explorar os itens do apartamento livremente. Cada item tem uma narração pronta na aba <strong>Itens</strong>. Não force a saída, ela vai partir quando sentir que é hora.</p>
+          <p><strong>Gatilho de saída:</strong> ela pega a passagem. O ônibus sai hoje.</p>
+        </div>
+      </div>
+
+      <div id="cena-flashback" class="scene-block" style="display:none">
+        <div class="scene-block-title">02, Flashback no Ônibus</div>
+        <div class="scene-body">
+          <p><strong>Tom:</strong> saudade, calor de verão, conforto que não existe mais. Música: (dream), Sylvia Path.</p>
+          <p>É uma <strong>cena jogável</strong>, não uma cutscene. Alice vive a memória, age dentro dela. Katrina e Ingrid estão presentes.</p>
+          <p><strong>Katrina:</strong> entra na casa antes de Mannon, como se fosse a dela. Fala palavrão naturalmente, ri do próprio humor antes de terminar a piada. Com Ingrid vira outra pessoa por dez segundos, depois volta a ser ela mesma.</p>
+          <p><strong>Ingrid:</strong> na cozinha, aparece sem cerimônia. Pergunta se Katrina quer ficar pro jantar antes de perguntar como foi o dia da própria filha. Intimidade que não precisa de muito.</p>
+          <p><strong>Encerra:</strong> quando chegar num momento emocional bom. O ônibus freia. Viksdal à noite.</p>
+        </div>
+      </div>
+
+      <div id="cena-chegada" class="scene-block" style="display:none">
+        <div class="scene-block-title">03, Chegada em Viksdal</div>
+        <div class="scene-body">
+          <p><strong>Tom:</strong> ar frio, cheiro de terra molhada e algo adocicado que não se identifica. Silêncio sem cães.</p>
+          <p>Plataforma de madeira, lâmpada solitária, ônibus some ao virar. Alice explora livremente o trajeto até a casa de Ingrid no norte da cidade.</p>
+          <p><strong>Pontos do trajeto:</strong></p>
+          <p><strong>Mural da plataforma:</strong> aviso de desaparecida, Liisa Mäkinen, foto borrada olhando para o lado. Detalhe solto, tira atenção.</p>
+          <p><strong>Rua principal:</strong> Farmácia Häkinen fechada com grade, flores frescas do lado de fora. Bicicleta caída sem dono. Par de botas na soleira de uma casa.</p>
+        </div>
+      </div>
+
+      <div id="cena-igrejinha" class="scene-block" style="display:none">
+        <div class="scene-block-title">04, A Igrejinha</div>
+        <div class="scene-body">
+          <p>Porta entreaberta, luz de vela. Dentro: memorial de fotos na parede, livro de hinos aberto com linha sublinhada em vermelho.</p>
+          <p>Tradução da linha sublinhada: <em>"ela volta sempre pra casa."</em></p>
+          <p>Bíblia no púlpito aberta no texto de lore. <span class="tag tag-lore">documento</span> Revela o Éden IV para Alice no painel de documentos.</p>
+          <p>Não force a exploração. Se ela quiser ir embora logo, deixa. O texto está lá se ela quiser ler.</p>
+        </div>
+      </div>
+
+      <div id="cena-arvore" class="scene-block" style="display:none">
+        <div class="scene-block-title">05, O Cruzamento</div>
+        <div class="scene-body">
+          <p>Árvore velha com fitas desbotadas amarradas. Marcas no tronco, símbolo ou desgaste.</p>
+          <div class="photo-op">
+            <strong>📷 Oportunidade de Foto</strong>
+            <div class="photo-layers">
+              <div class="photo-layer">
+                <span class="layer-name">Presente</span>
+                <span class="layer-cost">0 SAN</span>
+                <span class="layer-desc">sombras dos galhos não batem com a lua. Buff: +1 em VER nos testes de percepção em Viksdal.</span>
+              </div>
+              <div class="photo-layer">
+                <span class="layer-name">Passado</span>
+                <span class="layer-cost">-1 SAN</span>
+                <span class="layer-desc">pessoas de costas em círculo, mãos dadas. Uma criança virada pra câmera, vestido igual ao de Ingrid no flashback. Buff: reconhece símbolos do culto automaticamente.</span>
+              </div>
+              <div class="photo-layer">
+                <span class="layer-name">Futuro</span>
+                <span class="layer-cost">-2 SAN</span>
+                <span class="layer-desc">árvore morta, fitas sumidas, algo enrolado no tronco. Figura desfocada imóvel. Buff: age primeiro em um momento de perigo nessa sessão.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="cena-casa1" class="scene-block" style="display:none">
+        <div class="scene-block-title">06, Casa de Ingrid, 1º Andar</div>
+        <div class="scene-body">
+          <p>Chegar e encontrar bagunça como se houvesse briga. Ingrid não está. Dois andares.</p>
+          <p><strong>Cheiro:</strong> perfume antigo misturado com terra. Castiçal na sala, cera ainda mole, alguém estava aqui hoje.</p>
+          <p>Itens disponíveis: faca de cozinha, carta de Ingrid no livro de receitas, castiçal, frasco de ervas. Ver aba <strong>Itens</strong> para narrações completas.</p>
+          <p><span class="tag tag-item">item</span> A faca está no chão da cozinha, longe de qualquer gaveta. Estranhamente limpa.</p>
+          <p><span class="tag tag-lore">documento</span> Carta de Ingrid, revela quando ela encontrar o livro de receitas.</p>
+          <p><span class="tag tag-lore">documento</span> Frasco de ervas, revela quando ela encontrar a prateleira da cozinha.</p>
+        </div>
+      </div>
+
+      <div id="cena-casa2" class="scene-block" style="display:none">
+        <div class="scene-block-title">07, Casa de Ingrid, 2º Andar</div>
+        <div class="scene-body">
+          <p>A escada range diferente, som úmido. Corredor curto, duas portas. Porta esquerda entreaberta, porta direita fechada com fio de luz embaixo.</p>
+          <p><strong>Quarto de Ingrid (esquerda):</strong> revirado, mas a escrivaninha intacta. Diário em cima dela.</p>
+          <p><span class="tag tag-lore">documento</span> Diário de Ingrid. A última entrada corta no meio da frase sobre a árvore. Página arrancada com força.</p>
+          <p><strong>Banheiro (direita):</strong> maçaneta morna. A Impostora está dentro.</p>
+          <p><strong>Portas e janelas:</strong> depois que Alice entrar no banheiro e a Impostora aparecer, a porta da casa está trancada e as janelas não abrem. Não precisa explicar como. Simplesmente não abrem.</p>
+        </div>
+      </div>
+
+      <div id="cena-impostora" class="scene-block" style="display:none">
+        <div class="scene-block-title">08, A Impostora</div>
+        <div class="scene-body">
+          <p>Está de costas na frente do espelho. Usa o vestido de Ingrid. Aplica desesperadamente o batom cor de vinho da mãe, não nos lábios, no rosto inteiro, em linhas longas e irregulares. Como se não soubesse o que um rosto é, só que existe um gesto que se faz diante de espelhos.</p>
+          <p>Quando vira: traços quase certos. Ombros altos demais. Cabelos se movendo sem vento. Olhos sem direção fixa, olham pra tudo ao mesmo tempo. No lugar dos passos: som baixo e úmido, como raízes se partindo dentro da madeira.</p>
+          <div class="alert">
+            <strong>Verdade por trás:</strong> a Impostora é a verdadeira forma de Ingrid, o organismo Eden tentando manter a forma humana que usou por anos. Alice não pode saber disso agora. Mannon vê como monstro porque os remédios estão em falta.
+          </div>
+          <p><strong>Após o combate,</strong> independente do resultado: a cidade planta a ideia de que foi surto. Ela olha pra câmera, o filme não foi gasto. Olha pra faca, sem sangue. O banheiro está intacto. Os remédios estão acabando. Mannon aceita a explicação porque precisa acreditar nisso.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PAINEL NPCS -->
+    <div class="panel" id="panel-npcs">
+      <div class="panel-title">Personagens</div>
+
+      <div class="npc-card enemy">
+        <div class="npc-header">
+          <span class="npc-name">A Impostora</span>
+          <span class="npc-role">antagonista sessão 1, forma de Ingrid</span>
+        </div>
+        <div class="npc-stats">
+          <span class="npc-stat">Vida <span>20</span></span>
+          <span class="npc-stat">Dano <span>alto</span></span>
+          <span class="npc-stat">Câmera <span>mata</span></span>
+        </div>
+        <div class="npc-desc">
+          <p>Visual: vestido de Ingrid, batom aplicado no rosto inteiro de forma desesperada. Ombros altos demais, cabeça inclinada em ângulo que pescoço humano não faz. Cabelos se movem sem vento. Olhos sem direção fixa.</p>
+          <p>Comportamento: nunca corre. Só caminha. Sempre está perto. Som dos passos: raízes se partindo dentro da madeira.</p>
+          <p>Verdade: é a forma real de Ingrid, Eden tentando manter a casca humana. Mannon vê como monstro por estar em abstinência dos remédios.</p>
+        </div>
+      </div>
+
+      <div class="npc-card absent">
+        <div class="npc-header">
+          <span class="npc-name">Katrina</span>
+          <span class="npc-role">morta, presente no flashback</span>
+        </div>
+        <div class="npc-desc">
+          <p>Atrevida, engraçada, provocativa, completamente à vontade em qualquer lugar. Fala palavrão naturalmente. Ri do próprio humor antes de terminar a piada. Com Ingrid fica educada por exatamente dez segundos.</p>
+          <p>Morreu assassinada pelo ex-namorado Erik, que a esfaqueou numa crise de ciúmes.</p>
+        </div>
+      </div>
+
+      <div class="npc-card absent">
+        <div class="npc-header">
+          <span class="npc-name">Ingrid</span>
+          <span class="npc-role">morta, mãe de Mannon</span>
+        </div>
+        <div class="npc-desc">
+          <p>Na memória: calma, na cozinha, farinha na manga sem perceber. Pergunta se Katrina quer ficar pro jantar antes de perguntar como foi o dia da filha. Intimidade que não precisa de muito.</p>
+          <p>Verdade: era uma extensão de Eden. Fugiu, tentou completar um ritual sozinha, falhou. Foi descartada. A depressão e esquizofrenia eram sintomas de rejeição.</p>
+        </div>
+      </div>
+
+      <div class="npc-card neutral">
+        <div class="npc-header">
+          <span class="npc-name">Erik</span>
+          <span class="npc-role">ausente na sessão 1, futuro perseguidor</span>
+        </div>
+        <div class="npc-desc">
+          <p>Ex-namorado de Katrina, 4 anos mais velho. Aparentemente bom namorado, na realidade abusivo e possessivo. Assassinou Katrina numa crise de ciúmes, esfaqueou ela até a morte.</p>
+          <p>Aparece nas sessões futuras como perseguidor de Mannon, obcecado por ela porque lembra Katrina. Sistema de perseguição estilo Nemesis: reaparece em locais diversos, não pode ser derrotado permanentemente até momento específico.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PAINEL ITENS -->
+    <div class="panel" id="panel-itens">
+      <div class="panel-title">Itens e Narrações</div>
+
+      <div class="scene-block-title">Apartamento de Mannon</div>
+      <div class="items-grid">
+        <div class="item-card">
+          <span class="item-icon">📷</span>
+          <span class="item-name">Câmera Polaroid</span>
+          <div class="item-desc">Estojo de couro gasto. Foto presa na alça por elástico, paisagem de Morret rejeitada. Verso em caneta vermelha: "Bonita, mas sem sentimento." Letra desconhecida.</div>
+          <span class="item-stat">13 filmes</span>
+        </div>
+        <div class="item-card">
+          <span class="item-icon">💊</span>
+          <span class="item-name">Zolpidem</span>
+          <div class="item-desc">Três comprimidos. Validade vencida há dois meses. Traços riscados com a unha na lateral: noites que conseguiu dormir de verdade. São poucos.</div>
+          <span class="item-stat">qtd: 3</span>
+        </div>
+        <div class="item-card">
+          <span class="item-icon">✉️</span>
+          <span class="item-name">Caderno de Cartas</span>
+          <div class="item-desc">Rascunhos à mãe, frases riscadas, cartas nunca terminadas. A última carta enviada está arrancada. Só sobrou o vinco no papel.</div>
+        </div>
+        <div class="item-card">
+          <span class="item-icon">🪟</span>
+          <span class="item-name">Passagem de Ônibus</span>
+          <div class="item-desc">Morret para Viksdal, data de hoje. Ela não lembra de ter comprado. A tinta está levemente borrada como se tivesse ficado molhada. Mas não choveu.</div>
+        </div>
+        <div class="item-card">
+          <span class="item-icon">🖼️</span>
+          <span class="item-name">Auto-retrato</span>
+          <div class="item-desc">Pasta embaixo da cama. Ela olha pra câmera mas parece olhar pra outra coisa. A janela atrás dela está aberta na foto. A fechadura dessa janela está quebrada há meses.</div>
+        </div>
+        <div class="item-card">
+          <span class="item-icon">📸</span>
+          <span class="item-name">Foto de Katrina</span>
+          <div class="item-desc">Sempre carrega. Katrina sorrindo, sol na cara. Bordas plastificadas com fita adesiva velha. Verso: "pra vc não me esquecer. K"</div>
+          <span class="item-stat">inventário fixo</span>
+        </div>
+      </div>
+
+      <div class="scene-block-title" style="margin-top:20px">Casa de Ingrid</div>
+      <div class="items-grid">
+        <div class="item-card">
+          <span class="item-icon">🔪</span>
+          <span class="item-name">Faca de Cozinha</span>
+          <div class="item-desc">No chão, longe de qualquer gaveta. Estranhamente limpa. Cabo de madeira escura, gasto pelo uso de anos.</div>
+          <span class="item-stat">dano: 1d5</span>
+        </div>
+        <div class="item-card">
+          <span class="item-icon">✉️</span>
+          <span class="item-name">Carta de Ingrid</span>
+          <div class="item-desc">No livro de receitas. Letra firme. Fala das 40 fotos do mesmo gato. "Ainda tenho essas fotos." Sem data. Mannon não lembra de ter recebido.</div>
+          <span class="item-stat">revelar: documentos</span>
+        </div>
+        <div class="item-card">
+          <span class="item-icon">🕯️</span>
+          <span class="item-name">Castiçal</span>
+          <div class="item-desc">Único lugar não revirado na sala. Três velas derretidas até a base. A cera ainda está mole. Alguém estava aqui hoje.</div>
+        </div>
+        <div class="item-card">
+          <span class="item-icon">📖</span>
+          <span class="item-name">Diário de Ingrid</span>
+          <div class="item-desc">Embaixo do colchão. Entradas mundanas que param no meio de uma frase sobre a árvore. Página arrancada com força, pedaços na costura.</div>
+          <span class="item-stat">revelar: documentos</span>
+        </div>
+        <div class="item-card">
+          <span class="item-icon">🌿</span>
+          <span class="item-name">Frasco de Ervas</span>
+          <div class="item-desc">Sem rótulo, sem cheiro. Tira de papel colada com cera: "Juuri muistaa sinut." Tradução: "Eu senti saudades de você."</div>
+          <span class="item-stat">revelar: documentos</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PAINEL MECÂNICAS -->
+    <div class="panel" id="panel-mecanicas">
+      <div class="panel-title">Mecânicas Rápidas</div>
+
+      <div class="mech-box">
+        <div class="mech-box-title">Rolagens, 1d20</div>
+        <div class="mech-box-body">
+          Dificuldade <strong>10</strong> = fácil, <strong>15</strong> = médio, <strong>20</strong> = difícil, <strong>25</strong> = quase impossível.<br>
+          Alice descreve a ação, rola, você narra o resultado. Sem turnos fixos.
+        </div>
+      </div>
+
+      <div class="mech-box">
+        <div class="mech-box-title">Combate</div>
+        <div class="mech-box-body">
+          Faca: <strong>1d5 de dano</strong> por acerto. A Impostora tem <strong>20 de vida</strong>, dano dela é alto e pode ser quase mortal.<br>
+          Câmera: Alice acredita que mata a Impostora. O flash a derruba. Não gasta filme porque o combate é real mas a "morte" não é permanente da mesma forma.
+        </div>
+      </div>
+
+      <div class="mech-box">
+        <div class="mech-box-title">Câmera Polaroid</div>
+        <div class="mech-box-body">
+          Total: <strong>13 filmes</strong>. Você indica a oportunidade, Alice decide se usa.<br><br>
+          Camada <strong>Presente:</strong> 0 SAN, vê o que está agora.<br>
+          Camada <strong>Passado:</strong> -1 SAN, vê o que foi. Disponível após Presente.<br>
+          Camada <strong>Futuro:</strong> -2 SAN, vê o que virá. Só disponível após Passado.<br><br>
+          Fotografar a Impostora: ela cai. Alice acredita que matou. Filme não gasta.
+        </div>
+      </div>
+
+      <div class="mech-box">
+        <div class="mech-box-title">Pós-combate, Script dos Remédios</div>
+        <div class="mech-box-body">
+          Independente de vencer ou perder: a cidade planta a ideia de surto. Câmera com filme intacto, faca sem sangue, banheiro intacto.<br><br>
+          <em>"Você estava delirando, Mannon. Quanto tempo faz que você não toma seus remédios? Já faz alguns dias que você vem regrando o uso para que eles não acabem."</em>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- SIDEBAR DIREITA, REFERÊNCIA RÁPIDA -->
+  <div class="sidebar-right">
+
+    <div class="quick-block">
+      <span class="quick-title">Mannon, Estado Atual</span>
+      <div class="quick-row"><span class="k">Sanidade</span><span class="v">20 / 20</span></div>
+      <div class="quick-row"><span class="k">Vida</span><span class="v green">6 / 6</span></div>
+      <div class="quick-row"><span class="k">Filmes</span><span class="v">13</span></div>
+      <div class="quick-row"><span class="k">Zolpidem</span><span class="v red">3</span></div>
+      <div class="quick-row"><span class="k">Faca</span><span class="v">não coletada</span></div>
+    </div>
+
+    <div class="quick-sep"></div>
+
+    <div class="quick-block">
+      <span class="quick-title">Trilha de Sanidade</span>
+      <div class="san-track">
+        <div class="san-level s1"><span class="num">20</span>Funcional, insônia vívida</div>
+        <div class="san-level s2"><span class="num">15</span>Fragmentada, confusão temporal</div>
+        <div class="san-level s3"><span class="num">10</span>Quebrada, realidade distorce</div>
+        <div class="san-level s4"><span class="num">5</span>Cedente, vila fala direto</div>
+        <div class="san-level s5"><span class="num">0</span>Fim de jogo</div>
+      </div>
+    </div>
+
+    <div class="quick-sep"></div>
+
+    <div class="quick-block">
+      <span class="quick-title">Ficha ao Vivo</span>
+
+      <div style="margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span style="font-size:0.65em; color:var(--text3);">SAN</span>
+          <span style="font-size:0.7em; color:var(--blood2);" id="live-san">20 / 20</span>
+        </div>
+        <div style="height:4px; background:var(--border); border-radius:2px;">
+          <div id="live-san-bar" style="height:100%; background:var(--blood2); border-radius:2px; width:100%; transition:width 0.4s;"></div>
+        </div>
+        <div style="display:flex; gap:4px; margin-top:5px;">
+          <button onclick="masterChange('sanidade',-1)" style="flex:1; padding:4px; font-family:var(--font); font-size:0.7em; background:transparent; border:1px solid var(--border2); color:var(--text2); cursor:pointer;">−1</button>
+          <button onclick="masterChange('sanidade',-3)" style="flex:1; padding:4px; font-family:var(--font); font-size:0.7em; background:transparent; border:1px solid var(--border2); color:var(--text2); cursor:pointer;">−3</button>
+          <button onclick="masterChange('sanidade',1)" style="flex:1; padding:4px; font-family:var(--font); font-size:0.7em; background:transparent; border:1px solid var(--border2); color:var(--text2); cursor:pointer;">+1</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span style="font-size:0.65em; color:var(--text3);">Vida</span>
+          <span style="font-size:0.7em; color:var(--green2);" id="live-vida">6 / 6</span>
+        </div>
+        <div style="height:4px; background:var(--border); border-radius:2px;">
+          <div id="live-vida-bar" style="height:100%; background:var(--green2); border-radius:2px; width:100%; transition:width 0.4s;"></div>
+        </div>
+        <div style="display:flex; gap:4px; margin-top:5px;">
+          <button onclick="masterChange('vida',-1)" style="flex:1; padding:4px; font-family:var(--font); font-size:0.7em; background:transparent; border:1px solid var(--border2); color:var(--text2); cursor:pointer;">−1</button>
+          <button onclick="masterChange('vida',-2)" style="flex:1; padding:4px; font-family:var(--font); font-size:0.7em; background:transparent; border:1px solid var(--border2); color:var(--text2); cursor:pointer;">−2</button>
+          <button onclick="masterChange('vida',1)" style="flex:1; padding:4px; font-family:var(--font); font-size:0.7em; background:transparent; border:1px solid var(--border2); color:var(--text2); cursor:pointer;">+1</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom:6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span style="font-size:0.65em; color:var(--text3);">Fome</span>
+          <span style="font-size:0.7em; color:#daa520;" id="live-fome">6 / 6</span>
+        </div>
+        <div style="height:4px; background:var(--border); border-radius:2px;">
+          <div id="live-fome-bar" style="height:100%; background:#daa520; border-radius:2px; width:100%; transition:width 0.4s;"></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span style="font-size:0.65em; color:var(--text3);">Sede</span>
+          <span style="font-size:0.7em; color:var(--blue2);" id="live-sede">6 / 6</span>
+        </div>
+        <div style="height:4px; background:var(--border); border-radius:2px;">
+          <div id="live-sede-bar" style="height:100%; background:var(--blue2); border-radius:2px; width:100%; transition:width 0.4s;"></div>
+        </div>
+      </div>
+
+      <div class="quick-row" style="margin-top:8px;"><span class="k">Filmes restantes</span><span class="v" id="live-filmes">13</span></div>
+      <div class="quick-row"><span class="k">Zolpidem</span><span class="v red" id="live-zolpidem">4</span></div>
+    </div>
+
+    <div class="quick-sep"></div>
+      <div class="quick-row"><span class="k">Documentos</span><span class="v blue">Alice</span></div>
+      <div class="quick-row"><span class="k">Mestre Docs</span><span class="v blue">Você</span></div>
+      <div class="quick-row"><span class="k">Mapa Cidade</span><span class="v blue">mapa.html</span></div>
+      <div class="quick-row"><span class="k">Casa Ingrid</span><span class="v blue">casa.html</span></div>
+    </div>
+
+    <div class="quick-sep"></div>
+
+    <div class="quick-block">
+      <span class="quick-title">Regras de Narração</span>
+      <div style="font-size:0.65em; color: var(--text3); line-height:1.7;">
+        Segunda pessoa sempre.<br>
+        Nunca roteirizar demais.<br>
+        Eden nunca é revelado diretamente.<br>
+        Sanidade: avisar o custo antes.<br>
+        Câmera: avisar a oportunidade.<br>
+        Horror psicológico primeiro.
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  function showPanel(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    event.target.classList.add('active');
+
+    if (name === 'cenas') {
+      const firstScene = document.querySelector('.scene-item');
+      if (firstScene) goScene(firstScene, 'cena-apartamento');
+    }
+  }
+
+  function goScene(el, sceneId) {
+    document.querySelectorAll('.scene-item').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.scene-block').forEach(s => s.style.display = 'none');
+    const target = document.getElementById(sceneId);
+    if (target) {
+      target.style.display = 'block';
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  // Inicializar
+  document.getElementById('cena-apartamento').style.display = 'block';
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue, get, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBCYLeM-kzt-ranLjPpJKerO1K-nF0U7_0",
+    authDomain: "viksdal-rpg.firebaseapp.com",
+    databaseURL: "https://viksdal-rpg-default-rtdb.firebaseio.com",
+    projectId: "viksdal-rpg",
+    storageBucket: "viksdal-rpg.firebasestorage.app",
+    messagingSenderId: "259939315752",
+    appId: "1:259939315702:web:b599846c0fb7ac48c6e1d7"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const fichaRef = ref(db, 'ficha');
+
+  function bar(id, val, max) {
+    const el = document.getElementById(id);
+    if (el) el.style.width = (max > 0 ? Math.round((val/max)*100) : 0) + '%';
+  }
+
+  onValue(fichaRef, (snap) => {
+    if (!snap.exists()) return;
+    const d = snap.val();
+    const r = d.recursos || {};
+
+    const san = r.sanidade ?? 20;
+    const maxSan = r.maxSanidade ?? 20;
+    const vida = r.vida ?? 6;
+    const maxVida = r.maxVida ?? 6;
+    const fome = r.fome ?? 6;
+    const maxFome = r.maxFome ?? 6;
+    const sede = r.sede ?? 6;
+    const maxSede = r.maxSede ?? 6;
+
+    const el = (id) => document.getElementById(id);
+    if (el('live-san'))  el('live-san').textContent  = san + ' / ' + maxSan;
+    if (el('live-vida')) el('live-vida').textContent = vida + ' / ' + maxVida;
+    if (el('live-fome')) el('live-fome').textContent = fome + ' / ' + maxFome;
+    if (el('live-sede')) el('live-sede').textContent = sede + ' / ' + maxSede;
+
+    bar('live-san-bar',  san,  maxSan);
+    bar('live-vida-bar', vida, maxVida);
+    bar('live-fome-bar', fome, maxFome);
+    bar('live-sede-bar', sede, maxSede);
+
+    const filmes = d.filmes || {};
+    const restantes = (filmes.total ?? 13) - (filmes.usados ?? 0);
+    if (el('live-filmes')) el('live-filmes').textContent = restantes;
+
+    const inv = d.inventario || [];
+    if (el('live-zolpidem')) el('live-zolpidem').textContent = inv[0] ?? '?';
+  });
+
+  // Botões do mestre para alterar valores diretamente
+  window.masterChange = async function(campo, delta) {
+    const snap = await get(fichaRef);
+    if (!snap.exists()) return;
+    const d = snap.val();
+    const r = d.recursos || {};
+
+    if (campo === 'sanidade') {
+      const max = r.maxSanidade ?? 20;
+      const novo = Math.max(0, Math.min(max, (r.sanidade ?? 20) + delta));
+      await set(ref(db, 'ficha/recursos/sanidade'), novo);
+    } else if (campo === 'vida') {
+      const max = r.maxVida ?? 6;
+      const novo = Math.max(0, Math.min(max, (r.vida ?? 6) + delta));
+      await set(ref(db, 'ficha/recursos/vida'), novo);
+    }
+  };
+</script>
+</body>
+</html>

@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MANNON - FICHA DE PERSONAGEM</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Courier+Prime:wght@400;700&display=swap');
+
+        :root {
+            --sanity: 20;
+            --sanity-percent: 100%;
+            --vida-percent: 100%;
+            --fome-percent: 100%;
+            --sede-percent: 100%;
+            --deterioration: 0;
+            --paper: #f5f5f0;
+            --ink: #2c2c2c;
+            --accent: #8b4513;
+            --blood: #722f37;
+            --shadow: rgba(0,0,0,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: linear-gradient(135deg, #e8e6e1 0%, #d4d0c8 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--ink);
+            transition: all 0.5s ease;
+        }
+
+        body[data-sanity="high"] { filter: contrast(100%) brightness(100%); }
+        body[data-sanity="medium"] { filter: contrast(110%) brightness(95%) sepia(20%); background: linear-gradient(135deg, #e0ddd5 0%, #c9c4b8 100%); }
+        body[data-sanity="low"] { filter: contrast(120%) brightness(85%) sepia(40%) grayscale(30%); background: linear-gradient(135deg, #d5d0c5 0%, #b8b0a0 100%); }
+        body[data-sanity="critical"] { filter: contrast(130%) brightness(75%) sepia(60%) grayscale(50%); background: linear-gradient(135deg, #c9c4b8 0%, #a8a090 100%); }
+
+        .container { max-width: 1200px; margin: 0 auto; background: var(--paper); box-shadow: 0 0 30px var(--shadow); position: relative; overflow: hidden; }
+        .container::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E"); pointer-events: none; opacity: calc(0.3 + (var(--deterioration) * 0.02)); transition: opacity 0.5s ease; }
+
+        .stain { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(139,69,19,0.1) 0%, transparent 70%); pointer-events: none; transition: all 0.5s ease; }
+        .stain-1 { width: 200px; height: 200px; top: 10%; right: 5%; opacity: calc(0.2 + var(--deterioration) * 0.03); }
+        .stain-2 { width: 150px; height: 150px; bottom: 20%; left: 3%; opacity: calc(0.15 + var(--deterioration) * 0.02); }
+        .stain-3 { width: 100px; height: 100px; top: 50%; right: 15%; opacity: calc(0.1 + var(--deterioration) * 0.025); }
+
+        header { background: linear-gradient(180deg, #2c2c2c 0%, #1a1a1a 100%); color: #f5f5f0; padding: 30px; text-align: center; position: relative; border-bottom: 3px solid var(--accent); }
+        header::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 200px; height: 20px; background: var(--accent); clip-path: polygon(10% 0, 90% 0, 100% 100%, 0% 100%); }
+        h1 { font-size: 3em; letter-spacing: 0.3em; font-weight: 400; text-transform: uppercase; margin-bottom: 10px; font-family: 'Courier Prime', monospace; }
+        .subtitle { font-style: italic; font-size: 1.2em; opacity: 0.8; letter-spacing: 0.1em; }
+
+        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+        .left-column, .right-column { padding: 30px; }
+        .left-column { border-right: 1px solid rgba(0,0,0,0.1); }
+
+        .section { margin-bottom: 30px; position: relative; background: rgba(255,255,255,0.4); padding: 20px; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: all 0.3s ease; }
+        .section-title { font-family: 'Courier Prime', monospace; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.2em; color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 5px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .section-title::before { content: '◈'; color: var(--blood); }
+
+        input[type="text"], input[type="number"], textarea, select { font-family: 'Cormorant Garamond', serif; background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.2); padding: 8px 12px; font-size: 1.1em; color: var(--ink); width: 100%; transition: all 0.3s ease; }
+        input[type="text"]:focus, input[type="number"]:focus, textarea:focus { outline: none; border-color: var(--blood); background: rgba(255,255,255,0.9); box-shadow: 0 0 10px rgba(114,47,55,0.1); }
+
+        /* BARRAS DE RECURSO */
+        .resource-container { background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%); color: #f5f5f0; padding: 20px; margin: -30px -30px 30px -30px; position: relative; overflow: hidden; }
+        .resource-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .resource-box { position: relative; }
+        .resource-label { font-family: 'Courier Prime', monospace; font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 6px; opacity: 0.8; }
+        .resource-display { display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px; }
+        .resource-value { font-size: 2em; font-weight: 600; font-family: 'Courier Prime', monospace; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.2); transition: all 0.3s ease; }
+        .resource-max { font-size: 1em; opacity: 0.5; }
+        .resource-bar-container { width: 100%; height: 8px; background: rgba(255,255,255,0.1); position: relative; overflow: hidden; border-radius: 2px; }
+        .resource-bar { height: 100%; transition: width 0.5s ease, filter 0.5s ease; position: relative; }
+        .resource-bar::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%); animation: shimmer 2s infinite; }
+        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+        .sanity-bar { background: linear-gradient(90deg, #722f37 0%, #8b4513 50%, #d4af37 100%); width: var(--sanity-percent); }
+        .vida-bar { background: linear-gradient(90deg, #2d5016 0%, #4a7c2e 50%, #7cb342 100%); width: var(--vida-percent); }
+        .fome-bar { background: linear-gradient(90deg, #8b4513 0%, #cd853f 50%, #daa520 100%); width: var(--fome-percent); }
+        .sede-bar { background: linear-gradient(90deg, #1e3a5f 0%, #4a90e2 50%, #87ceeb 100%); width: var(--sede-percent); }
+
+        .resource-controls { display: flex; gap: 6px; margin-top: 10px; align-items: center; }
+        .resource-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: #fff; width: 30px; height: 30px; font-size: 1.1em; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; border-radius: 3px; }
+        .resource-btn:hover { background: rgba(255,255,255,0.2); border-color: var(--blood); }
+        .resource-input { width: 50px !important; text-align: center; font-size: 1.1em !important; background: rgba(255,255,255,0.1) !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.3) !important; }
+        .resource-status { margin-left: auto; font-family: 'Courier Prime', monospace; font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.1em; padding: 3px 10px; border: 1px solid rgba(255,255,255,0.3); border-radius: 3px; }
+
+        /* Foto de perfil dentro do resource-box de Sanidade */
+        .profile-photo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .profile-thumb {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .profile-thumb img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+        .profile-thumb .placeholder {
+            font-size: 0.6em;
+            color: #aaa;
+            text-align: center;
+            padding: 4px;
+        }
+        .profile-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
+            width: 30px;
+            height: 30px;
+            font-size: 1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 3px;
+            transition: 0.2s;
+        }
+        .profile-btn:hover {
+            background: var(--blood);
+            border-color: var(--blood);
+        }
+
+        .attributes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .attribute-box { background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.15); padding: 15px; text-align: center; position: relative; transition: all 0.3s ease; }
+        .attribute-box:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .attribute-name { font-family: 'Courier Prime', monospace; font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 8px; }
+        .attribute-input { width: 60px !important; text-align: center; font-size: 2em !important; font-weight: 600; border: none !important; background: transparent !important; border-bottom: 2px solid var(--accent) !important; padding: 0 !important; }
+        .attribute-mod { font-size: 0.8em; color: var(--blood); margin-top: 5px; font-family: 'Courier Prime', monospace; }
+
+        .calculated-box { background: linear-gradient(135deg, rgba(114,47,55,0.1) 0%, rgba(139,69,19,0.1) 100%); border: 1px solid rgba(114,47,55,0.3); padding: 15px; margin-top: 15px; font-family: 'Courier Prime', monospace; font-size: 0.85em; }
+        .calculated-title { text-transform: uppercase; letter-spacing: 0.1em; color: var(--blood); margin-bottom: 10px; font-weight: 700; }
+        .calc-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dotted rgba(0,0,0,0.1); }
+        .calc-value { font-weight: 700; color: var(--accent); }
+
+        .skills-container { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        .skill-row { display: flex; align-items: center; gap: 10px; padding: 8px; background: rgba(255,255,255,0.4); border-left: 3px solid transparent; transition: all 0.2s ease; }
+        .skill-row:hover { background: rgba(255,255,255,0.7); border-left-color: var(--accent); }
+        .skill-name { flex: 1; font-size: 1em; }
+        .skill-value { width: 50px; text-align: center; }
+        .skill-total { width: 60px; text-align: center; font-family: 'Courier Prime', monospace; font-weight: 700; color: var(--blood); background: rgba(114,47,55,0.1); padding: 5px; }
+
+        .inventory-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .inventory-item { display: flex; gap: 5px; align-items: center; }
+        .item-name { flex: 1; }
+        .item-qty { width: 50px; text-align: center; }
+
+        .camera-section { background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%); color: #f5f5f0; padding: 20px; margin-bottom: 20px; }
+        .camera-title { font-family: 'Courier Prime', monospace; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .camera-icon { font-size: 1.5em; }
+        .film-counter { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+        .film-label { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.7; }
+        .film-slots { display: flex; gap: 5px; flex-wrap: wrap; }
+        .film-slot { width: 28px; height: 35px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; font-size: 0.65em; }
+        .film-slot.used { background: var(--blood); border-color: var(--blood); }
+        .film-slot:hover:not(.used) { background: rgba(255,255,255,0.2); }
+
+        .photos-controls { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .photo-btn { background: var(--accent); color: #fff; border: none; padding: 8px 15px; font-family: 'Courier Prime', monospace; font-size: 0.8em; cursor: pointer; transition: all 0.2s ease; border-radius: 3px; }
+        .photo-btn:hover { background: var(--blood); transform: translateY(-1px); }
+        .photos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+
+        /* Estilo do polaroid com imagem */
+        .photo-polaroid { background: #fff; padding: 8px 8px 25px 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); transform: rotate(-1deg); transition: all 0.3s ease; cursor: pointer; position: relative; display: flex; flex-direction: column; }
+        .photo-polaroid:nth-child(even) { transform: rotate(1deg); }
+        .photo-polaroid:hover { transform: rotate(0deg) scale(1.03); box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 10; }
+        .photo-polaroid.revealed { opacity: 0.6; }
+        .photo-placeholder { background: #333; min-height: 100px; display: flex; align-items: center; justify-content: center; color: #888; font-family: 'Courier Prime', monospace; font-size: 0.7em; text-align: center; padding: 5px; position: relative; overflow: hidden; flex-shrink: 0; }
+        .photo-placeholder img { max-width: 100%; max-height: 150px; object-fit: cover; display: block; margin: 0 auto; }
+        .photo-caption { margin-top: 8px; font-size: 0.85em; font-style: italic; text-align: center; color: var(--ink); min-height: 2.5em; outline: none; }
+        .photo-cost { text-align: center; font-family: 'Courier Prime', monospace; font-size: 0.65em; color: var(--blood); margin-top: 3px; outline: none; }
+        .photo-delete { position: absolute; top: -8px; right: -8px; width: 22px; height: 22px; background: var(--blood); color: #fff; border: none; border-radius: 50%; cursor: pointer; font-size: 0.8em; display: none; align-items: center; justify-content: center; z-index: 20; }
+        .photo-setimg { position: absolute; bottom: 35px; right: 5px; width: 24px; height: 24px; background: var(--accent); color: #fff; border: none; border-radius: 3px; cursor: pointer; font-size: 0.8em; display: flex; align-items: center; justify-content: center; z-index: 20; opacity: 0.8; transition: opacity 0.2s; }
+        .photo-setimg:hover { opacity: 1; background: var(--blood); }
+        .photo-polaroid:hover .photo-delete { display: flex; }
+
+        .notes-area { width: 100%; min-height: 120px; background: rgba(255,255,255,0.5); border: 1px solid rgba(0,0,0,0.2); padding: 15px; font-family: 'Cormorant Garamond', serif; font-size: 1.1em; line-height: 1.6; resize: vertical; }
+
+        .consciousness-track { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
+        .consciousness-level { display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(255,255,255,0.3); border-left: 4px solid transparent; transition: all 0.3s ease; opacity: 0.5; }
+        .consciousness-level.active { opacity: 1; border-left-color: var(--blood); background: rgba(114,47,55,0.1); }
+        .consciousness-level.locked { opacity: 0.3; font-style: italic; }
+        .consciousness-level.locked .consciousness-desc { filter: blur(3px); user-select: none; }
+        .consciousness-number { font-family: 'Courier Prime', monospace; font-weight: 700; width: 30px; }
+        .consciousness-desc { flex: 1; font-size: 0.9em; }
+        .consciousness-hint { font-size: 0.75em; color: var(--accent); opacity: 0.7; margin-left: 5px; }
+
+        footer { background: #2c2c2c; color: #f5f5f0; text-align: center; padding: 20px; font-family: 'Courier Prime', monospace; font-size: 0.8em; letter-spacing: 0.2em; text-transform: uppercase; }
+
+        .action-buttons { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .action-btn { background: linear-gradient(135deg, var(--accent) 0%, var(--blood) 100%); color: #fff; border: none; padding: 12px 20px; font-family: 'Courier Prime', monospace; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: all 0.3s ease; border-radius: 3px; display: flex; align-items: center; gap: 8px; }
+        .action-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .action-btn.secondary { background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%); }
+
+        #file-input { display: none; }
+
+        @media (max-width: 900px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .left-column { border-right: none; border-bottom: 1px solid rgba(0,0,0,0.1); }
+            .attributes-grid { grid-template-columns: 1fr 1fr; }
+            .resource-grid { grid-template-columns: 1fr; }
+        }
+
+        @media print {
+            .action-buttons, .resource-controls, .film-slot, .photo-btn, .photo-delete, .photo-setimg, .profile-btn { display: none !important; }
+            body { filter: none !important; }
+        }
+    </style>
+</head>
+<body data-sanity="high">
+    <div class="container">
+        <div class="stain stain-1"></div>
+        <div class="stain stain-2"></div>
+        <div class="stain stain-3"></div>
+
+        <header>
+            <h1>MANNON</h1>
+            <div class="subtitle">Ficha de Personagem • RPG de Mesa Solo</div>
+        </header>
+
+        <div style="padding: 15px 30px; background: rgba(0,0,0,0.05); border-bottom: 1px solid rgba(0,0,0,0.1);">
+            <div class="action-buttons">
+                <button class="action-btn" onclick="downloadSheet()">💾 Baixar Ficha</button>
+                <button class="action-btn secondary" onclick="document.getElementById('file-input').click()">📂 Carregar Ficha</button>
+                <button class="action-btn secondary" onclick="window.print()">🖨️ Imprimir</button>
+                <input type="file" id="file-input" accept=".json" onchange="loadSheet(event)">
+                <span id="sync-status" style="margin-left:auto; font-family:'Courier Prime',monospace; font-size:0.7em; letter-spacing:0.15em; text-transform:uppercase; color:#888; padding: 6px 12px; border: 1px solid #ccc; border-radius:3px; align-self:center;">⬤ offline</span>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="left-column">
+
+                <!-- RECURSOS: SANIDADE (com foto de perfil), VIDA, FOME, SEDE -->
+                <div class="resource-container">
+                    <div class="resource-grid">
+                        <!-- Sanidade + Foto de Perfil -->
+                        <div class="resource-box">
+                            <div class="profile-photo-container">
+                                <div class="profile-thumb" id="profile-thumb">
+                                    <div class="placeholder">📷</div>
+                                </div>
+                                <button class="profile-btn" onclick="setProfileImage()">🖼️</button>
+                                <div class="resource-label">Integridade Mental</div>
+                            </div>
+                            <div class="resource-display">
+                                <span class="resource-value" id="sanity-current">20</span>
+                                <span class="resource-max" id="sanity-max-display">/ 20</span>
+                            </div>
+                            <div class="resource-bar-container">
+                                <div class="resource-bar sanity-bar" id="sanity-bar"></div>
+                            </div>
+                            <div class="resource-controls">
+                                <button class="resource-btn" onclick="changeSanity(-1)">−</button>
+                                <input type="number" class="resource-input" id="sanity-input" value="20" min="0" onchange="updateSanity(this.value)">
+                                <button class="resource-btn" onclick="changeSanity(1)">+</button>
+                                <div class="resource-status" id="sanity-status">Funcional</div>
+                            </div>
+                        </div>
+                        <!-- Vitalidade -->
+                        <div class="resource-box">
+                            <div class="resource-label">Vitalidade (Vida)</div>
+                            <div class="resource-display">
+                                <span class="resource-value" id="vida-current">6</span>
+                                <span class="resource-max" id="vida-max-display">/ 6</span>
+                            </div>
+                            <div class="resource-bar-container">
+                                <div class="resource-bar vida-bar" id="vida-bar"></div>
+                            </div>
+                            <div class="resource-controls">
+                                <button class="resource-btn" onclick="changeVida(-1)">−</button>
+                                <input type="number" class="resource-input" id="vida-input" value="6" min="0" onchange="updateVida(this.value)">
+                                <button class="resource-btn" onclick="changeVida(1)">+</button>
+                                <div class="resource-status" id="vida-status" style="border-color: #4a7c2e; color: #4a7c2e;">Íntegra</div>
+                            </div>
+                        </div>
+                        <!-- Saciedade -->
+                        <div class="resource-box">
+                            <div class="resource-label">Saciedade (Fome)</div>
+                            <div class="resource-display">
+                                <span class="resource-value" id="fome-current">6</span>
+                                <span class="resource-max" id="fome-max-display">/ 6</span>
+                            </div>
+                            <div class="resource-bar-container">
+                                <div class="resource-bar fome-bar" id="fome-bar"></div>
+                            </div>
+                            <div class="resource-controls">
+                                <button class="resource-btn" onclick="changeFome(-1)">−</button>
+                                <input type="number" class="resource-input" id="fome-input" value="6" min="0" onchange="updateFome(this.value)">
+                                <button class="resource-btn" onclick="changeFome(1)">+</button>
+                                <div class="resource-status" id="fome-status" style="border-color: #daa520; color: #daa520;">Saciada</div>
+                            </div>
+                        </div>
+                        <!-- Hidratação -->
+                        <div class="resource-box">
+                            <div class="resource-label">Hidratação (Sede)</div>
+                            <div class="resource-display">
+                                <span class="resource-value" id="sede-current">6</span>
+                                <span class="resource-max" id="sede-max-display">/ 6</span>
+                            </div>
+                            <div class="resource-bar-container">
+                                <div class="resource-bar sede-bar" id="sede-bar"></div>
+                            </div>
+                            <div class="resource-controls">
+                                <button class="resource-btn" onclick="changeSede(-1)">−</button>
+                                <input type="number" class="resource-input" id="sede-input" value="6" min="0" onchange="updateSede(this.value)">
+                                <button class="resource-btn" onclick="changeSede(1)">+</button>
+                                <div class="resource-status" id="sede-status" style="border-color: #87ceeb; color: #87ceeb;">Hidratada</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IDENTIDADE -->
+                <div class="section">
+                    <div class="section-title">Identidade</div>
+                    <div style="display: grid; gap: 10px;">
+                        <div>
+                            <label style="font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent);">Nome</label>
+                            <input type="text" id="char-nome" value="Mannon" style="font-size: 1.3em; font-weight: 600;">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div>
+                                <label style="font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent);">Idade</label>
+                                <input type="text" id="char-idade" value="22 anos">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent);">Ocupação</label>
+                                <input type="text" id="char-ocupacao" value="Fotógrafa">
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent);">Origem</label>
+                            <input type="text" id="char-origem" value="Viksen, Finlândia → Morret (cidade grande)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ATRIBUTOS -->
+                <div class="section">
+                    <div class="section-title">Atributos Fundamentais</div>
+                    <div class="attributes-grid">
+                        <div class="attribute-box">
+                            <div class="attribute-name">Ver</div>
+                            <input type="number" class="attribute-input" id="attr-ver" value="3" min="1" max="5" onchange="calculateAll()">
+                            <div class="attribute-mod">Percepção</div>
+                        </div>
+                        <div class="attribute-box">
+                            <div class="attribute-name">Aguentar</div>
+                            <input type="number" class="attribute-input" id="attr-aguentar" value="2" min="1" max="5" onchange="calculateAll()">
+                            <div class="attribute-mod">Resistência</div>
+                        </div>
+                        <div class="attribute-box">
+                            <div class="attribute-name">Lembrar</div>
+                            <input type="number" class="attribute-input" id="attr-lembrar" value="2" min="1" max="5" onchange="calculateAll()">
+                            <div class="attribute-mod">Memória</div>
+                        </div>
+                        <div class="attribute-box">
+                            <div class="attribute-name">Ceder</div>
+                            <input type="number" class="attribute-input" id="attr-ceder" value="1" min="1" max="5" onchange="calculateAll()">
+                            <div class="attribute-mod">Abrir Mão</div>
+                        </div>
+                        <div class="attribute-box">
+                            <div class="attribute-name">Criar</div>
+                            <input type="number" class="attribute-input" id="attr-criar" value="4" min="1" max="5" onchange="calculateAll()">
+                            <div class="attribute-mod">Arte/Fotografia</div>
+                        </div>
+                        <div class="attribute-box">
+                            <div class="attribute-name">Fugir</div>
+                            <input type="number" class="attribute-input" id="attr-fugir" value="2" min="1" max="5" onchange="calculateAll()">
+                            <div class="attribute-mod">Evitar</div>
+                        </div>
+                    </div>
+
+                    <div class="calculated-box">
+                        <div class="calculated-title">Derivados Automáticos</div>
+                        <div class="calc-row">
+                            <span>Vitalidade Máxima</span>
+                            <span class="calc-value" id="calc-vida-max">6</span>
+                            <span style="font-size: 0.8em; opacity: 0.6;">(Aguentar × 3)</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>Sanidade Máxima</span>
+                            <span class="calc-value" id="calc-estabilidade">20</span>
+                            <span style="font-size: 0.8em; opacity: 0.6;">(Lembrar × 10)</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>Saciedade Máxima</span>
+                            <span class="calc-value" id="calc-fome-max">6</span>
+                            <span style="font-size: 0.8em; opacity: 0.6;">(Aguentar × 3)</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>Hidratação Máxima</span>
+                            <span class="calc-value" id="calc-sede-max">6</span>
+                            <span style="font-size: 0.8em; opacity: 0.6;">(Aguentar × 3)</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>Slots de Perícias</span>
+                            <span class="calc-value" id="calc-pericias">6</span>
+                            <span style="font-size: 0.8em; opacity: 0.6;">(Ver + Lembrar)</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>Resistência a Influência</span>
+                            <span class="calc-value" id="calc-resistencia">3</span>
+                            <span style="font-size: 0.8em; opacity: 0.6;">(Ceder × 3)</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>Poder da Câmera</span>
+                            <span class="calc-value" id="calc-camera">4</span>
+                            <span style="font-size: 0.8em; opacity: 0.6;">(Criar)</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>Iniciativa/Evasão</span>
+                            <span class="calc-value" id="calc-iniciativa">4</span>
+                            <span style="font-size: 0.8em; opacity: 0.6;">(Fugir × 2)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PERÍCIAS -->
+                <div class="section">
+                    <div class="section-title">Perícias (<span id="pericias-used">0</span>/<span id="pericias-max">6</span>)</div>
+                    <div class="skills-container" id="skills-container">
+                        <div class="skill-row"><span class="skill-name">Fotografia Artística</span><input type="number" class="skill-value" value="0" min="0" max="3" onchange="updateSkill(this, 'criar')"><span class="skill-total" id="skill-total-0">4</span></div>
+                        <div class="skill-row"><span class="skill-name">Percepção de Detalhes</span><input type="number" class="skill-value" value="0" min="0" max="3" onchange="updateSkill(this, 'ver')"><span class="skill-total" id="skill-total-1">3</span></div>
+                        <div class="skill-row"><span class="skill-name">Escuta/Intuição</span><input type="number" class="skill-value" value="0" min="0" max="3" onchange="updateSkill(this, 'ver')"><span class="skill-total" id="skill-total-2">3</span></div>
+                        <div class="skill-row"><span class="skill-name">Resistir à Dor</span><input type="number" class="skill-value" value="0" min="0" max="3" onchange="updateSkill(this, 'aguentar')"><span class="skill-total" id="skill-total-3">2</span></div>
+                        <div class="skill-row"><span class="skill-name">Memória Eidética</span><input type="number" class="skill-value" value="0" min="0" max="3" onchange="updateSkill(this, 'lembrar')"><span class="skill-total" id="skill-total-4">2</span></div>
+                        <div class="skill-row"><span class="skill-name">Esconder-se</span><input type="number" class="skill-value" value="0" min="0" max="3" onchange="updateSkill(this, 'fugir')"><span class="skill-total" id="skill-total-5">2</span></div>
+                        <div class="skill-row"><span class="skill-name">Correr/Escapar</span><input type="number" class="skill-value" value="0" min="0" max="3" onchange="updateSkill(this, 'fugir')"><span class="skill-total" id="skill-total-6">2</span></div>
+                        <div class="skill-row"><span class="skill-name">Auto-Medicação</span><input type="number" class="skill-value" value="0" min="0" max="3" onchange="updateSkill(this, 'ceder')"><span class="skill-total" id="skill-total-7">1</span></div>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 0.85em; font-style: italic; color: var(--accent);">* Total = Atributo base + Pontos de perícia</div>
+                </div>
+
+                <!-- TRAUMAS -->
+                <div class="section">
+                    <div class="section-title">Traumas & Conexões</div>
+                    <div style="display: grid; gap: 15px;">
+                        <div>
+                            <label style="font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent);">Trauma Originário</label>
+                            <textarea id="char-trauma" class="notes-area" style="min-height: 60px; font-size: 0.95em;">Abandono paterno, pobreza extrema, morte de Katrina (melhor amiga), suicídio da mãe.</textarea>
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent);">Vício/Dependência</label>
+                            <input type="text" id="char-vicio" value="Zolpidem (soníferos tarja preta)" style="color: var(--blood);">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent);">Conexão Inquebrável</label>
+                            <input type="text" id="char-conexao" value="Katrina (falecida, mas presente na vila)">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="right-column">
+
+                <!-- CÂMERA -->
+                <div class="camera-section">
+                    <div class="camera-title"><span class="camera-icon">📷</span><span>Polaroid SX-70 • A Mecânica</span></div>
+                    <div class="film-counter">
+                        <span class="film-label">Filmes:</span>
+                        <div class="film-slots" id="film-slots"></div>
+                        <span id="film-count" style="margin-left: 10px; font-family: 'Courier Prime', monospace;">12</span>
+                    </div>
+                    <div style="font-size: 0.85em; line-height: 1.6; opacity: 0.9; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px;">
+                        <strong>Custo por Revelação:</strong><br>
+                        Camada 1 (Presente): <span style="color: #d4af37;">1 SAN</span> • 
+                        Camada 2 (Passado): <span style="color: #ff8c00;">2 SAN</span> • 
+                        Camada 3 (Futuro): <span style="color: #ff4444;">3 SAN</span>
+                    </div>
+                </div>
+
+                <!-- INVENTÁRIO (modificado: cigarros e fósforo) -->
+                <div class="section">
+                    <div class="section-title">Inventário & Itens</div>
+                    <div class="inventory-grid" id="inventory-grid">
+                        <div class="inventory-item"><span class="item-name">Zolpidem</span><input type="number" class="item-qty" value="4" min="0"></div>
+                        <div class="inventory-item"><span class="item-name">Água</span><input type="number" class="item-qty" value="2" min="0"></div>
+                        <div class="inventory-item"><span class="item-name">Comida</span><input type="number" class="item-qty" value="3" min="0"></div>
+                        <div class="inventory-item"><span class="item-name">Fósforo</span><input type="number" class="item-qty" value="1" min="0"></div>
+                        <div class="inventory-item"><span class="item-name">Cigarros</span><input type="number" class="item-qty" value="2" min="0"></div>
+                        <div class="inventory-item"><span class="item-name">Foto de Katrina</span><input type="number" class="item-qty" value="1" min="0"></div>
+                        <div class="inventory-item"><span class="item-name">Dinheiro</span><input type="number" class="item-qty" value="340" min="0"></div>
+                        <div class="inventory-item"><span class="item-name">Baterias</span><input type="number" class="item-qty" value="2" min="0"></div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <label style="font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent);">Itens Especiais / Notas</label>
+                        <textarea id="itens-especiais" class="notes-area" style="min-height: 80px;" placeholder="Escreva itens encontrados na vila aqui..."></textarea>
+                    </div>
+                </div>
+
+                <!-- FOTOS REVELADAS (COM SUPORTE A IMAGEM) -->
+                <div class="section">
+                    <div class="section-title">Fotos Reveladas (Memórias da Vila)</div>
+                    <div class="photos-controls">
+                        <button class="photo-btn" onclick="addPhoto()">➕ Nova Foto</button>
+                        <button class="photo-btn" onclick="clearAllPhotos()" style="background: var(--blood);">🗑️ Limpar Todas</button>
+                    </div>
+                    <div class="photos-grid" id="photos-container">
+                        <!-- Foto inicial de exemplo -->
+                        <div class="photo-polaroid" data-id="0" data-img-url="">
+                            <button class="photo-delete" onclick="deletePhoto(0)">×</button>
+                            <button class="photo-setimg" onclick="event.stopPropagation(); setPhotoImage(this.parentElement)">🖼️</button>
+                            <div class="photo-placeholder">Sessão 1<br>Casa Inexistente</div>
+                            <div class="photo-caption" contenteditable="true">A primeira verdade</div>
+                            <div class="photo-cost" contenteditable="true">Custo: ? SAN</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ESTADOS DE CONSCIÊNCIA -->
+                <div class="section">
+                    <div class="section-title">Estados de Consciência</div>
+                    <div class="consciousness-track" id="consciousness-track">
+                        <div class="consciousness-level" data-threshold="20">
+                            <span class="consciousness-number">20</span>
+                            <span class="consciousness-desc"><strong>Funcional:</strong> Ansiedade elevada, insônia vívida</span>
+                        </div>
+                        <div class="consciousness-level" data-threshold="15">
+                            <span class="consciousness-number">15</span>
+                            <span class="consciousness-desc"><strong>Fragmentada:</strong> Alucinações leves, confusão temporal</span>
+                        </div>
+                        <div class="consciousness-level" data-threshold="10">
+                            <span class="consciousness-number">10</span>
+                            <span class="consciousness-desc"><strong>Quebrada:</strong> Realidade distorce, conversa com ausentes</span>
+                        </div>
+                        <div class="consciousness-level" data-threshold="5">
+                            <span class="consciousness-number">5</span>
+                            <span class="consciousness-desc"><strong>Cedente:</strong> Vila fala diretamente, obedece sem perceber</span>
+                        </div>
+                        <div class="consciousness-level locked" data-threshold="0">
+                            <span class="consciousness-number">0</span>
+                            <span class="consciousness-desc"><strong>???</strong> <span class="consciousness-hint">(descubra jogando)</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ANOTAÇÕES -->
+                <div class="section">
+                    <div class="section-title">Anotações da Sessão</div>
+                    <textarea id="anotacoes" class="notes-area" placeholder="Registre aqui descobertas, nomes de NPCs, pistas, sensações..."></textarea>
+                </div>
+
+            </div>
+        </div>
+
+        <footer>A que Dá Morada • Viksdal • Não-linear</footer>
+    </div>
+
+    <script>
+        // === ESTADO GLOBAL ===
+        let currentSanity = 20;
+        let maxSanity = 20;
+        let currentVida = 6;
+        let maxVida = 6;
+        let currentFome = 6;
+        let maxFome = 6;
+        let currentSede = 6;
+        let maxSede = 6;
+        let totalFilms = 12;
+        let usedFilms = 0;
+        let photoCount = 1; // já existe uma foto com id 0
+
+        // Foto de perfil
+        let profileImageUrl = '';
+
+        const skillAttributes = ['criar', 'ver', 'ver', 'aguentar', 'lembrar', 'fugir', 'fugir', 'ceder'];
+
+        // === SANIDADE (máx = Lembrar × 10) ===
+        function updateSanity(value) {
+            currentSanity = Math.max(0, Math.min(maxSanity, parseInt(value) || 0));
+            document.getElementById('sanity-current').textContent = currentSanity;
+            document.getElementById('sanity-input').value = currentSanity;
+            document.getElementById('sanity-input').max = maxSanity;
+            const percent = maxSanity > 0 ? (currentSanity / maxSanity) * 100 : 0;
+            document.getElementById('sanity-bar').style.width = percent + '%';
+            document.documentElement.style.setProperty('--sanity-percent', percent + '%');
+            document.documentElement.style.setProperty('--sanity', currentSanity);
+            document.documentElement.style.setProperty('--deterioration', maxSanity - currentSanity);
+            updateSanityStatus();
+            updateConsciousnessTrack();
+            if (window._scheduleSync) window._scheduleSync();
+        }
+
+        function changeSanity(delta) { updateSanity(currentSanity + delta); }
+
+
+        function updateSanityStatus() {
+            const statusEl = document.getElementById('sanity-status');
+            const body = document.body;
+            let status, sanityLevel, color;
+            const ratio = maxSanity > 0 ? currentSanity / maxSanity : 1;
+            if (ratio >= 0.75) { status = 'Funcional'; sanityLevel = 'high'; color = '#4a90e2'; }
+            else if (ratio >= 0.5) { status = 'Fragmentada'; sanityLevel = 'medium'; color = '#f5a623'; }
+            else if (ratio >= 0.25) { status = 'Quebrada'; sanityLevel = 'low'; color = '#d0021b'; }
+            else { status = 'Cedente'; sanityLevel = 'critical'; color = '#8b0000'; }
+            statusEl.textContent = status;
+            statusEl.style.borderColor = color;
+            statusEl.style.color = color;
+            body.setAttribute('data-sanity', sanityLevel);
+        }
+
+        // === VIDA ===
+        function updateVida(value) {
+            currentVida = Math.max(0, Math.min(maxVida, parseInt(value) || 0));
+            document.getElementById('vida-current').textContent = currentVida;
+            document.getElementById('vida-input').value = currentVida;
+            document.getElementById('vida-input').max = maxVida;
+            const percent = maxVida > 0 ? (currentVida / maxVida) * 100 : 0;
+            document.getElementById('vida-bar').style.width = percent + '%';
+            document.documentElement.style.setProperty('--vida-percent', percent + '%');
+            updateVidaStatus();
+            if (window._scheduleSync) window._scheduleSync();
+        }
+
+        function changeVida(delta) { updateVida(currentVida + delta); }
+
+        function updateVidaStatus() {
+            const statusEl = document.getElementById('vida-status');
+            let status, color;
+            const ratio = maxVida > 0 ? currentVida / maxVida : 1;
+            if (ratio >= 0.75) { status = 'Íntegra'; color = '#4a7c2e'; }
+            else if (ratio >= 0.5) { status = 'Machucada'; color = '#7cb342'; }
+            else if (ratio >= 0.25) { status = 'Ferida'; color = '#f5a623'; }
+            else if (currentVida > 0) { status = 'Crítica'; color = '#d0021b'; }
+            else { status = '...'; color = '#8b0000'; }
+            statusEl.textContent = status;
+            statusEl.style.borderColor = color;
+            statusEl.style.color = color;
+        }
+
+        // === FOME ===
+        function updateFome(value) {
+            currentFome = Math.max(0, Math.min(maxFome, parseInt(value) || 0));
+            document.getElementById('fome-current').textContent = currentFome;
+            document.getElementById('fome-input').value = currentFome;
+            document.getElementById('fome-input').max = maxFome;
+            const percent = maxFome > 0 ? (currentFome / maxFome) * 100 : 0;
+            document.getElementById('fome-bar').style.width = percent + '%';
+            document.documentElement.style.setProperty('--fome-percent', percent + '%');
+            updateFomeStatus();
+            if (window._scheduleSync) window._scheduleSync();
+        }
+
+        function changeFome(delta) { updateFome(currentFome + delta); }
+
+        function updateFomeStatus() {
+            const statusEl = document.getElementById('fome-status');
+            let status, color;
+            const ratio = maxFome > 0 ? currentFome / maxFome : 1;
+            if (ratio >= 0.8) { status = 'Saciada'; color = '#daa520'; }
+            else if (ratio >= 0.5) { status = 'Com fome'; color = '#cd853f'; }
+            else if (ratio >= 0.2) { status = 'Faminta'; color = '#d0021b'; }
+            else { status = 'Desnutrida'; color = '#8b0000'; }
+            statusEl.textContent = status;
+            statusEl.style.borderColor = color;
+            statusEl.style.color = color;
+        }
+
+        // === SEDE ===
+        function updateSede(value) {
+            currentSede = Math.max(0, Math.min(maxSede, parseInt(value) || 0));
+            document.getElementById('sede-current').textContent = currentSede;
+            document.getElementById('sede-input').value = currentSede;
+            document.getElementById('sede-input').max = maxSede;
+            const percent = maxSede > 0 ? (currentSede / maxSede) * 100 : 0;
+            document.getElementById('sede-bar').style.width = percent + '%';
+            document.documentElement.style.setProperty('--sede-percent', percent + '%');
+            updateSedeStatus();
+            if (window._scheduleSync) window._scheduleSync();
+        }
+
+        function changeSede(delta) { updateSede(currentSede + delta); }
+
+        function updateSedeStatus() {
+            const statusEl = document.getElementById('sede-status');
+            let status, color;
+            const ratio = maxSede > 0 ? currentSede / maxSede : 1;
+            if (ratio >= 0.8) { status = 'Hidratada'; color = '#87ceeb'; }
+            else if (ratio >= 0.5) { status = 'Com sede'; color = '#4a90e2'; }
+            else if (ratio >= 0.2) { status = 'Sedenta'; color = '#d0021b'; }
+            else { status = 'Desidratada'; color = '#8b0000'; }
+            statusEl.textContent = status;
+            statusEl.style.borderColor = color;
+            statusEl.style.color = color;
+        }
+
+        // === CONSCIÊNCIA ===
+        function updateConsciousnessTrack() {
+            const levels = document.querySelectorAll('.consciousness-level');
+            levels.forEach(level => {
+                const threshold = parseInt(level.getAttribute('data-threshold'));
+                level.classList.remove('active');
+                if (currentSanity <= threshold && currentSanity > (threshold - 5 || 0)) {
+                    level.classList.add('active');
+                }
+            });
+        }
+
+        // === ATRIBUTOS E CÁLCULOS ===
+        function calculateAll() {
+            const attrs = {
+                ver: parseInt(document.getElementById('attr-ver').value) || 1,
+                aguentar: parseInt(document.getElementById('attr-aguentar').value) || 1,
+                lembrar: parseInt(document.getElementById('attr-lembrar').value) || 1,
+                ceder: parseInt(document.getElementById('attr-ceder').value) || 1,
+                criar: parseInt(document.getElementById('attr-criar').value) || 1,
+                fugir: parseInt(document.getElementById('attr-fugir').value) || 1
+            };
+            
+            maxVida = attrs.aguentar * 3;
+            document.getElementById('calc-vida-max').textContent = maxVida;
+            document.getElementById('vida-max-display').textContent = '/ ' + maxVida;
+            if (currentVida > maxVida) currentVida = maxVida;
+            updateVida(currentVida);
+            
+            const newMaxSanity = attrs.lembrar * 10;
+            if (newMaxSanity !== maxSanity) {
+                maxSanity = newMaxSanity;
+                document.getElementById('calc-estabilidade').textContent = maxSanity;
+                document.getElementById('sanity-max-display').textContent = '/ ' + maxSanity;
+                if (currentSanity > maxSanity) currentSanity = maxSanity;
+                updateSanity(currentSanity);
+            }
+            
+            const newMaxFome = attrs.aguentar * 3;
+            if (newMaxFome !== maxFome) {
+                maxFome = newMaxFome;
+                document.getElementById('calc-fome-max').textContent = maxFome;
+                document.getElementById('fome-max-display').textContent = '/ ' + maxFome;
+                if (currentFome > maxFome) currentFome = maxFome;
+                updateFome(currentFome);
+            }
+            
+            const newMaxSede = attrs.aguentar * 3;
+            if (newMaxSede !== maxSede) {
+                maxSede = newMaxSede;
+                document.getElementById('calc-sede-max').textContent = maxSede;
+                document.getElementById('sede-max-display').textContent = '/ ' + maxSede;
+                if (currentSede > maxSede) currentSede = maxSede;
+                updateSede(currentSede);
+            }
+            
+            document.getElementById('calc-pericias').textContent = attrs.ver + attrs.lembrar;
+            document.getElementById('calc-resistencia').textContent = attrs.ceder * 3;
+            document.getElementById('calc-camera').textContent = attrs.criar;
+            document.getElementById('calc-iniciativa').textContent = attrs.fugir * 2;
+            document.getElementById('pericias-max').textContent = attrs.ver + attrs.lembrar;
+            updateAllSkillTotals();
+        }
+
+        // === PERÍCIAS ===
+        function updateSkill(input, attrName) {
+            const index = Array.from(document.querySelectorAll('.skill-value')).indexOf(input);
+            const attrValue = parseInt(document.getElementById('attr-' + skillAttributes[index]).value) || 1;
+            const skillPoints = parseInt(input.value) || 0;
+            document.getElementById('skill-total-' + index).textContent = attrValue + skillPoints;
+            updatePericiasUsed();
+        }
+
+        function updateAllSkillTotals() {
+            document.querySelectorAll('.skill-value').forEach((input, index) => {
+                updateSkill(input, skillAttributes[index]);
+            });
+        }
+
+        function updatePericiasUsed() {
+            const points = Array.from(document.querySelectorAll('.skill-value')).reduce((sum, input) => sum + (parseInt(input.value) || 0), 0);
+            document.getElementById('pericias-used').textContent = points;
+            if (window._scheduleSync) window._scheduleSync();
+        }
+
+        // === FILMES ===
+        function initFilmSlots() {
+            const container = document.getElementById('film-slots');
+            container.innerHTML = '';
+            for (let i = 0; i < totalFilms; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'film-slot' + (i < usedFilms ? ' used' : '');
+                slot.textContent = i + 1;
+                slot.onclick = () => toggleFilm(i);
+                container.appendChild(slot);
+            }
+            document.getElementById('film-count').textContent = totalFilms - usedFilms;
+        }
+
+        function toggleFilm(index) {
+            usedFilms = index < usedFilms ? index : index + 1;
+            initFilmSlots();
+            if (window._scheduleSync) window._scheduleSync();
+        }
+
+        // === FOTOS DINÂMICAS COM IMAGEM ===
+        function setPhotoImage(polaroid) {
+            let url = prompt("Insira a URL da imagem (deixe em branco para remover a imagem):", polaroid.dataset.imgUrl || "");
+            if (url === null) return;
+            url = url.trim();
+            const placeholder = polaroid.querySelector('.photo-placeholder');
+            placeholder.innerHTML = '';
+            if (url === '') {
+                placeholder.textContent = 'Sem imagem';
+                polaroid.dataset.imgUrl = '';
+            } else {
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = 'foto';
+                img.onerror = () => { placeholder.innerHTML = 'Erro ao carregar'; polaroid.dataset.imgUrl = ''; };
+                placeholder.appendChild(img);
+                polaroid.dataset.imgUrl = url;
+            }
+        }
+
+        function addPhoto() {
+            const container = document.getElementById('photos-container');
+            const id = photoCount++;
+            const photo = document.createElement('div');
+            photo.className = 'photo-polaroid';
+            photo.setAttribute('data-id', id);
+            photo.setAttribute('data-img-url', '');
+            photo.innerHTML = `
+                <button class="photo-delete" onclick="deletePhoto(${id})">×</button>
+                <button class="photo-setimg" onclick="event.stopPropagation(); setPhotoImage(this.parentElement)">🖼️</button>
+                <div class="photo-placeholder">Nova Foto</div>
+                <div class="photo-caption" contenteditable="true">Legenda...</div>
+                <div class="photo-cost" contenteditable="true">Custo: _ SAN</div>
+            `;
+            photo.onclick = function(e) { 
+                if (e.target.classList.contains('photo-delete') || e.target.classList.contains('photo-setimg')) return; 
+                this.classList.toggle('revealed'); 
+            };
+            container.appendChild(photo);
+        }
+
+        function deletePhoto(id) {
+            const photo = document.querySelector(`.photo-polaroid[data-id="${id}"]`);
+            if (photo) photo.remove();
+        }
+
+        function clearAllPhotos() {
+            if (confirm('Remover todas as fotos?')) {
+                document.getElementById('photos-container').innerHTML = '';
+                photoCount = 0;
+            }
+        }
+
+        // === FOTO DE PERFIL ===
+        function setProfileImage() {
+            let url = prompt("URL da foto de perfil de Mannon:", profileImageUrl || "");
+            if (url === null) return;
+            url = url.trim();
+            const thumb = document.getElementById('profile-thumb');
+            thumb.innerHTML = '';
+            if (url === '') {
+                thumb.innerHTML = '<div class="placeholder">📷</div>';
+                profileImageUrl = '';
+            } else {
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = 'perfil';
+                img.onerror = () => { thumb.innerHTML = '<div class="placeholder">Erro</div>'; profileImageUrl = ''; };
+                thumb.appendChild(img);
+                profileImageUrl = url;
+            }
+        }
+
+        // === SALVAR/CARREGAR JSON ===
+        function getSheetData() {
+            const photos = Array.from(document.querySelectorAll('.photo-polaroid')).map(p => {
+                const placeholderDiv = p.querySelector('.photo-placeholder');
+                let imgUrl = p.dataset.imgUrl || '';
+                const img = placeholderDiv.querySelector('img');
+                if (img && img.src) imgUrl = img.src;
+                return {
+                    imgUrl: imgUrl,
+                    placeholder: img ? '' : placeholderDiv.innerText,
+                    caption: p.querySelector('.photo-caption').innerText,
+                    cost: p.querySelector('.photo-cost').innerText,
+                    revealed: p.classList.contains('revealed')
+                };
+            });
+
+            return {
+                profileImage: profileImageUrl,
+                identidade: {
+                    nome: document.getElementById('char-nome').value,
+                    idade: document.getElementById('char-idade').value,
+                    ocupacao: document.getElementById('char-ocupacao').value,
+                    origem: document.getElementById('char-origem').value
+                },
+                atributos: {
+                    ver: document.getElementById('attr-ver').value,
+                    aguentar: document.getElementById('attr-aguentar').value,
+                    lembrar: document.getElementById('attr-lembrar').value,
+                    ceder: document.getElementById('attr-ceder').value,
+                    criar: document.getElementById('attr-criar').value,
+                    fugir: document.getElementById('attr-fugir').value
+                },
+                recursos: {
+                    sanidade: currentSanity,
+                    maxSanidade: maxSanity,
+                    vida: currentVida,
+                    fome: currentFome,
+                    maxFome: maxFome,
+                    sede: currentSede,
+                    maxSede: maxSede
+                },
+                pericias: Array.from(document.querySelectorAll('.skill-value')).map(i => i.value),
+                traumas: {
+                    trauma: document.getElementById('char-trauma').value,
+                    vicio: document.getElementById('char-vicio').value,
+                    conexao: document.getElementById('char-conexao').value
+                },
+                inventario: Array.from(document.querySelectorAll('.item-qty')).map(i => i.value),
+                itensEspeciais: document.getElementById('itens-especiais').value,
+                filmes: { total: totalFilms, usados: usedFilms },
+                fotos: photos,
+                anotacoes: document.getElementById('anotacoes').value,
+                versao: '1.5'
+            };
+        }
+
+        function downloadSheet() {
+            const data = getSheetData();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'mannon_ficha_' + new Date().toISOString().slice(0, 10) + '.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function loadSheet(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    applySheetData(data);
+                    alert('Ficha carregada com sucesso!');
+                } catch (err) {
+                    alert('Erro ao carregar ficha: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function applySheetData(data) {
+            // Foto de perfil
+            if (data.profileImage) {
+                profileImageUrl = data.profileImage;
+                const thumb = document.getElementById('profile-thumb');
+                thumb.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = profileImageUrl;
+                img.alt = 'perfil';
+                img.onerror = () => { thumb.innerHTML = '<div class="placeholder">📷</div>'; profileImageUrl = ''; };
+                thumb.appendChild(img);
+            } else {
+                document.getElementById('profile-thumb').innerHTML = '<div class="placeholder">📷</div>';
+                profileImageUrl = '';
+            }
+
+            if (data.identidade) {
+                document.getElementById('char-nome').value = data.identidade.nome || '';
+                document.getElementById('char-idade').value = data.identidade.idade || '';
+                document.getElementById('char-ocupacao').value = data.identidade.ocupacao || '';
+                document.getElementById('char-origem').value = data.identidade.origem || '';
+            }
+            if (data.atributos) {
+                document.getElementById('attr-ver').value = data.atributos.ver || 3;
+                document.getElementById('attr-aguentar').value = data.atributos.aguentar || 2;
+                document.getElementById('attr-lembrar').value = data.atributos.lembrar || 2;
+                document.getElementById('attr-ceder').value = data.atributos.ceder || 1;
+                document.getElementById('attr-criar').value = data.atributos.criar || 4;
+                document.getElementById('attr-fugir').value = data.atributos.fugir || 2;
+            }
+            if (data.recursos) {
+                if (data.recursos.maxSanidade) maxSanity = data.recursos.maxSanidade;
+                if (data.recursos.maxFome) maxFome = data.recursos.maxFome;
+                if (data.recursos.maxSede) maxSede = data.recursos.maxSede;
+                updateSanity(data.recursos.sanidade !== undefined ? data.recursos.sanidade : 20);
+                currentVida = data.recursos.vida !== undefined ? data.recursos.vida : 6;
+                updateFome(data.recursos.fome !== undefined ? data.recursos.fome : maxFome);
+                updateSede(data.recursos.sede !== undefined ? data.recursos.sede : maxSede);
+            }
+            if (data.pericias) {
+                document.querySelectorAll('.skill-value').forEach((input, i) => {
+                    if (data.pericias[i] !== undefined) input.value = data.pericias[i];
+                });
+            }
+            if (data.traumas) {
+                document.getElementById('char-trauma').value = data.traumas.trauma || '';
+                document.getElementById('char-vicio').value = data.traumas.vicio || '';
+                document.getElementById('char-conexao').value = data.traumas.conexao || '';
+            }
+            if (data.inventario) {
+                document.querySelectorAll('.item-qty').forEach((input, i) => {
+                    if (data.inventario[i] !== undefined) input.value = data.inventario[i];
+                });
+            }
+            if (data.itensEspeciais) document.getElementById('itens-especiais').value = data.itensEspeciais;
+            if (data.filmes) {
+                totalFilms = data.filmes.total || 12;
+                usedFilms = data.filmes.usados || 0;
+            }
+            if (data.fotos && data.fotos.length > 0) {
+                const container = document.getElementById('photos-container');
+                container.innerHTML = '';
+                photoCount = 0;
+                data.fotos.forEach((foto, idx) => {
+                    const id = photoCount++;
+                    const photo = document.createElement('div');
+                    photo.className = 'photo-polaroid' + (foto.revealed ? ' revealed' : '');
+                    photo.setAttribute('data-id', id);
+                    photo.setAttribute('data-img-url', foto.imgUrl || '');
+                    photo.innerHTML = `
+                        <button class="photo-delete" onclick="deletePhoto(${id})">×</button>
+                        <button class="photo-setimg" onclick="event.stopPropagation(); setPhotoImage(this.parentElement)">🖼️</button>
+                        <div class="photo-placeholder"></div>
+                        <div class="photo-caption" contenteditable="true">${foto.caption || ''}</div>
+                        <div class="photo-cost" contenteditable="true">${foto.cost || 'Custo: _ SAN'}</div>
+                    `;
+                    const placeholder = photo.querySelector('.photo-placeholder');
+                    if (foto.imgUrl) {
+                        const img = document.createElement('img');
+                        img.src = foto.imgUrl;
+                        img.alt = 'foto';
+                        img.onerror = () => { placeholder.innerHTML = 'Erro'; };
+                        placeholder.appendChild(img);
+                    } else {
+                        placeholder.textContent = foto.placeholder || 'Foto';
+                    }
+                    photo.onclick = function(e) { 
+                        if (e.target.classList.contains('photo-delete') || e.target.classList.contains('photo-setimg')) return; 
+                        this.classList.toggle('revealed'); 
+                    };
+                    container.appendChild(photo);
+                });
+            }
+            if (data.anotacoes) document.getElementById('anotacoes').value = data.anotacoes;
+            calculateAll();
+            initFilmSlots();
+            updatePericiasUsed();
+        }
+
+        // === INICIALIZAÇÃO ===
+        window.onload = function() {
+            calculateAll();
+            initFilmSlots();
+            updatePericiasUsed();
+            // Ajustar a foto inicial para ter o botão setimg
+            const initialPhoto = document.querySelector('.photo-polaroid[data-id="0"]');
+            if (initialPhoto) {
+                initialPhoto.dataset.imgUrl = '';
+            }
+        };
+    </script>
+
+    <!-- FIREBASE SYNC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBCYLeM-kzt-ranLjPpJKerO1K-nF0U7_0",
+            authDomain: "viksdal-rpg.firebaseapp.com",
+            databaseURL: "https://viksdal-rpg-default-rtdb.firebaseio.com",
+            projectId: "viksdal-rpg",
+            storageBucket: "viksdal-rpg.firebasestorage.app",
+            messagingSenderId: "259939315702",
+            appId: "1:259939315702:web:b599846c0fb7ac48c6e1d7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const fichaRef = ref(db, 'ficha');
+        const syncEl = document.getElementById('sync-status');
+
+        let syncTimeout = null;
+        let isSyncing = false;
+
+        function setSyncStatus(status) {
+            if (status === 'ok') {
+                syncEl.textContent = '⬤ salvo';
+                syncEl.style.color = '#4a7c2e';
+                syncEl.style.borderColor = '#4a7c2e';
+            } else if (status === 'saving') {
+                syncEl.textContent = '⬤ salvando...';
+                syncEl.style.color = '#8b6914';
+                syncEl.style.borderColor = '#8b6914';
+            } else if (status === 'error') {
+                syncEl.textContent = '⬤ erro';
+                syncEl.style.color = '#7a1a1a';
+                syncEl.style.borderColor = '#7a1a1a';
+            } else {
+                syncEl.textContent = '⬤ offline';
+                syncEl.style.color = '#888';
+                syncEl.style.borderColor = '#ccc';
+            }
+        }
+
+        // Expõe função de sync para o código principal
+        window._scheduleSync = function() {
+            clearTimeout(syncTimeout);
+            syncTimeout = setTimeout(doSync, 800);
+        };
+
+        async function doSync() {
+            if (isSyncing) return;
+            isSyncing = true;
+            setSyncStatus('saving');
+            try {
+                const data = window.getSheetData();
+                await set(fichaRef, data);
+                setSyncStatus('ok');
+            } catch(e) {
+                setSyncStatus('error');
+                console.error('Firebase sync error:', e);
+            }
+            isSyncing = false;
+        }
+
+        // Carrega do Firebase na inicialização
+        async function loadFromFirebase() {
+            try {
+                const snap = await get(fichaRef);
+                if (snap.exists()) {
+                    const data = snap.val();
+                    window.applySheetData(data);
+                    setSyncStatus('ok');
+                } else {
+                    setSyncStatus('ok');
+                }
+            } catch(e) {
+                setSyncStatus('error');
+                console.error('Firebase load error:', e);
+            }
+        }
+
+        // Aguarda o onload principal e depois carrega do Firebase
+        window.addEventListener('load', () => {
+            setTimeout(loadFromFirebase, 200);
+        });
+    </script>
+</html>
