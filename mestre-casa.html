@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mestre — Casa</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  const firebaseConfig = {
+  apiKey: "AIzaSyBCYLeM-kzt-ranLjPpJKerO1K-nF0U7_0",
+  authDomain: "viksdal-rpg.firebaseapp.com",
+  databaseURL: "https://viksdal-rpg-default-rtdb.firebaseio.com",
+  projectId: "viksdal-rpg",
+  storageBucket: "viksdal-rpg.firebasestorage.app",
+  messagingSenderId: "259939315702",
+  appId: "1:259939315702:web:b599846c0fb7ac48c6e1d7"
+};
+  const db = getDatabase(initializeApp(firebaseConfig));
+  const defaults = {
+    sala:           { name:'Sala de Estar',    unlocked:false, danger:false, note:'', items:0 },
+    cozinha:        { name:'Cozinha',           unlocked:false, danger:false, note:'', items:0 },
+    'quarto-mae':   { name:'Quarto de Ingrid',  unlocked:false, danger:false, note:'', items:0 },
+    'quarto-mannon':{ name:'Quarto de Mannon',  unlocked:false, danger:false, note:'', items:0 },
+    banheiro:       { name:'Banheiro',          unlocked:false, danger:false, note:'', items:0 },
+  };
+  let state = {};
+  onValue(ref(db,'casa/rooms'), snap => {
+    state = snap.val() || JSON.parse(JSON.stringify(defaults));
+    if (!snap.val()) set(ref(db,'casa/rooms'), state);
+    render();
+  });
+  function save(id) { set(ref(db,`casa/rooms/${id}`), state[id]); }
+  function toggle(id, field) { state[id][field]=!state[id][field]; save(id); }
+  function setNote(id,val)   { state[id].note=val; save(id); }
+  function setItems(id,val)  { state[id].items=Math.max(0,parseInt(val)||0); save(id); render(); }
+  function setPos(id)  { set(ref(db,'casa/position'),id); document.querySelectorAll('.pb').forEach(b=>b.classList.remove('pa')); document.getElementById('p-'+id)?.classList.add('pa'); }
+  function clearPos()  { set(ref(db,'casa/position'),null); document.querySelectorAll('.pb').forEach(b=>b.classList.remove('pa')); }
+  function resetAll()  { if(!confirm('Resetar?'))return; state=JSON.parse(JSON.stringify(defaults)); set(ref(db,'casa'),{rooms:state,position:null}); }
+  function render() {
+    const g=document.getElementById('grid'); if(!g)return; g.innerHTML='';
+    Object.entries(state).forEach(([id,r])=>{
+      const d=document.createElement('div');
+      d.className='card'+(r.unlocked?' unlocked':'');
+      d.innerHTML=`
+        <div class="cn">${r.name}</div>
+        <div class="bx">
+          <span class="b ${r.unlocked?'bon':'bof'}">${r.unlocked?'● visível':'○ oculto'}</span>
+          <span class="b ${r.danger?'bdg':'bof'}">${r.danger?'⚠ perigo':'— seguro'}</span>
+          <span class="b bof">itens: ${r.items}</span>
+        </div>
+        <div class="ax">
+          <button class="bt br" onclick="toggle('${id}','unlocked')">${r.unlocked?'Ocultar':'Revelar'}</button>
+          <button class="bt bd" onclick="toggle('${id}','danger')" ${!r.unlocked?'disabled':''}>${r.danger?'Sem perigo':'Perigo!'}</button>
+        </div>
+        <input class="ni" type="text" placeholder="nota (ex: faca encontrada)" value="${r.note}"
+          oninput="setNote('${id}',this.value)" ${!r.unlocked?'disabled':''}/>
+        <div class="ir">
+          <span style="color:#8a7a5a;font-size:13px">itens:</span>
+          <button class="mi" onclick="setItems('${id}',${r.items-1})" ${!r.unlocked?'disabled':''}>−</button>
+          <span class="ic">${r.items}</span>
+          <button class="mi" onclick="setItems('${id}',${r.items+1})" ${!r.unlocked?'disabled':''}>+</button>
+        </div>
+        <button id="p-${id}" class="bt pb" onclick="setPos('${id}')" ${!r.unlocked?'disabled':''}>📍 Mannon aqui</button>
+      `;
+      g.appendChild(d);
+    });
+  }
+  window.toggle=toggle; window.setNote=setNote; window.setItems=setItems;
+  window.setPos=setPos; window.clearPos=clearPos; window.resetAll=resetAll;
+</script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0d0b08;color:#c8b89a;font-family:'Caveat',cursive;min-height:100vh;padding:26px 18px}
+  header{text-align:center;margin-bottom:26px;border-bottom:1px solid rgba(107,58,42,.3);padding-bottom:16px}
+  header h1{font-size:22px;color:#ddd0b8;letter-spacing:.15em}
+  header p{font-style:italic;color:#6b3a2a;font-size:13px;margin-top:4px;letter-spacing:.1em}
+  .tb{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;max-width:900px;margin-left:auto;margin-right:auto;gap:8px;flex-wrap:wrap}
+  .treset{background:none;border:1px solid rgba(107,58,42,.4);color:#8a5040;font-family:'Caveat',cursive;font-size:13px;padding:5px 13px;cursor:pointer;transition:all .2s}
+  .treset:hover{border-color:#6b3a2a;color:#c8b89a}
+  .tclear{background:none;border:1px solid rgba(58,107,74,.3);color:#5a8a6a;font-family:'Caveat',cursive;font-size:13px;padding:5px 13px;cursor:pointer;transition:all .2s}
+  .tclear:hover{border-color:#3a6b4a;color:#8aba9a}
+  #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:13px;max-width:900px;margin:0 auto}
+  .card{background:rgba(25,18,10,.9);border:1px solid rgba(107,58,42,.2);padding:16px;transition:border-color .3s}
+  .card.unlocked{border-color:rgba(107,58,42,.45)}
+  .cn{font-size:17px;color:#ddd0b8;margin-bottom:8px;letter-spacing:.05em}
+  .bx{display:flex;gap:7px;margin-bottom:11px;flex-wrap:wrap}
+  .b{font-size:11px;letter-spacing:.07em;padding:2px 7px}
+  .bon{color:#4a8a5a;border:1px solid rgba(74,138,90,.3)}
+  .bof{color:#6a5a4a;border:1px solid rgba(106,90,74,.3)}
+  .bdg{color:#c03a22;border:1px solid rgba(192,58,34,.4)}
+  .ax{display:flex;gap:6px;margin-bottom:9px}
+  .bt{background:none;border:1px solid rgba(107,58,42,.35);color:#a89070;font-family:'Caveat',cursive;font-size:13px;padding:5px 10px;cursor:pointer;flex:1;transition:all .2s}
+  .bt:hover:not(:disabled){border-color:#6b3a2a;color:#ddd0b8;background:rgba(107,58,42,.1)}
+  .bt:disabled{opacity:.3;cursor:not-allowed}
+  .br{border-color:rgba(74,138,90,.3);color:#6a9a7a}
+  .br:hover:not(:disabled){border-color:#4a8a5a;color:#8aba9a;background:rgba(74,138,90,.08)}
+  .bd{border-color:rgba(192,58,34,.25);color:#9a5a4a}
+  .bd:hover:not(:disabled){border-color:#c03a22;color:#e07a5a;background:rgba(192,58,34,.08)}
+  .ni{width:100%;background:rgba(15,10,5,.8);border:1px solid rgba(107,58,42,.25);color:#c8b89a;font-family:'Caveat',cursive;font-size:13px;padding:5px 9px;outline:none;margin-bottom:8px;transition:border-color .2s}
+  .ni:focus{border-color:rgba(107,58,42,.6)}
+  .ni:disabled{opacity:.3}
+  .ir{display:flex;align-items:center;gap:7px;margin-bottom:9px}
+  .ic{min-width:18px;text-align:center;color:#c8b89a;font-size:15px}
+  .mi{background:none;border:1px solid rgba(107,58,42,.3);color:#a89070;font-family:'Caveat',cursive;font-size:15px;width:24px;height:24px;cursor:pointer;transition:all .2s}
+  .mi:hover:not(:disabled){border-color:#6b3a2a;color:#ddd0b8}
+  .mi:disabled{opacity:.3;cursor:not-allowed}
+  .pb{width:100%;font-size:12px;border-color:rgba(200,168,122,.2);color:#8a7a5a;flex:none}
+  .pa{border-color:#c03a22!important;color:#c03a22!important;background:rgba(192,58,34,.08)!important}
+  .foot{text-align:center;margin-top:26px;font-style:italic;font-size:12px;color:rgba(107,58,42,.4);letter-spacing:.1em}
+</style>
+</head>
+<body>
+<header>
+  <h1>PAINEL DO MESTRE — CASA</h1>
+  <p>controle em tempo real · casa de ingrid</p>
+</header>
+<div class="tb">
+  <button class="tclear" onclick="clearPos()">✕ limpar posição</button>
+  <button class="treset" onclick="resetAll()">↺ resetar sessão</button>
+</div>
+<div id="grid"><p style="color:#6a5a4a;font-style:italic;grid-column:1/-1;text-align:center;padding:40px">Conectando...</p></div>
+<div class="foot">alterações refletem no mapa da Alice em tempo real</div>
+</body>
+</html>
