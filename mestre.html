@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mestre — Viksdal</title>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+
+<!-- FIREBASE: substitua os valores abaixo pelos seus (passo 3 do guia) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+  apiKey: "AIzaSyBCYLeM-kzt-ranLjPpJKerO1K-nF0U7_0",
+  authDomain: "viksdal-rpg.firebaseapp.com",
+  databaseURL: "https://viksdal-rpg-default-rtdb.firebaseio.com",
+  projectId: "viksdal-rpg",
+  storageBucket: "viksdal-rpg.firebasestorage.app",
+  messagingSenderId: "259939315702",
+  appId: "1:259939315702:web:b599846c0fb7ac48c6e1d7"
+};
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Estado inicial dos locais
+  const defaultLocations = {
+    'plataforma':    { name: 'Plataforma',         unlocked: true,  visited: false },
+    'rua-principal': { name: 'Rua Principal',       unlocked: false, visited: false },
+    'farmacia':      { name: 'Farmácia Häkinen',    unlocked: false, visited: false },
+    'igrejinha':     { name: 'A Igrejinha',          unlocked: false, visited: false },
+    'cruzamento':    { name: 'O Cruzamento',         unlocked: false, visited: false },
+    'norte':         { name: 'Norte',               unlocked: false, visited: false },
+  };
+
+  let currentState = {};
+
+  // Lê estado atual do Firebase
+  onValue(ref(db, 'locations'), (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      currentState = data;
+    } else {
+      // Primeira vez: escreve o estado inicial
+      currentState = defaultLocations;
+      set(ref(db, 'locations'), defaultLocations);
+    }
+    renderCards();
+  });
+
+  function toggle(id, field) {
+    currentState[id][field] = !currentState[id][field];
+    // Se marcar visited, garante que está unlocked
+    if (field === 'visited' && currentState[id].visited) {
+      currentState[id].unlocked = true;
+    }
+    set(ref(db, `locations/${id}`), currentState[id]);
+  }
+
+  function renderCards() {
+    const grid = document.getElementById('grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    Object.entries(currentState).forEach(([id, loc]) => {
+      const card = document.createElement('div');
+      card.className = `card ${loc.unlocked ? 'unlocked' : 'locked-card'}`;
+
+      card.innerHTML = `
+        <div class="card-name">${loc.name}</div>
+        <div class="card-badges">
+          <span class="badge ${loc.unlocked ? 'badge-on' : 'badge-off'}">
+            ${loc.unlocked ? '● visível' : '○ oculto'}
+          </span>
+          <span class="badge ${loc.visited ? 'badge-visited' : 'badge-off'}">
+            ${loc.visited ? '✓ visitado' : '— não visitado'}
+          </span>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-unlock" onclick="window.toggle('${id}', 'unlocked')">
+            ${loc.unlocked ? 'Ocultar' : 'Revelar no mapa'}
+          </button>
+          <button class="btn btn-visit" onclick="window.toggle('${id}', 'visited')" ${!loc.unlocked ? 'disabled' : ''}>
+            ${loc.visited ? 'Desmarcar visitado' : 'Marcar visitado'}
+          </button>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  // Expõe toggle globalmente para os botões inline
+  window.toggle = toggle;
+
+  // Reset completo
+  window.resetAll = () => {
+    if (!confirm('Resetar todos os locais para o estado inicial?')) return;
+    currentState = JSON.parse(JSON.stringify(defaultLocations));
+    set(ref(db, 'locations'), currentState);
+  };
+</script>
+
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: #0d0b08;
+    color: #c8b89a;
+    font-family: 'Crimson Pro', serif;
+    min-height: 100vh;
+    padding: 32px 24px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 36px;
+    border-bottom: 1px solid rgba(107,58,42,0.3);
+    padding-bottom: 20px;
+  }
+
+  header h1 {
+    font-family: 'IM Fell English', serif;
+    font-size: 28px;
+    color: #ddd0b8;
+    letter-spacing: 0.15em;
+  }
+
+  header p {
+    font-style: italic;
+    color: #6b3a2a;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    margin-top: 6px;
+  }
+
+  .reset-bar {
+    text-align: right;
+    margin-bottom: 20px;
+  }
+
+  .btn-reset {
+    background: none;
+    border: 1px solid rgba(107,58,42,0.4);
+    color: #8a5040;
+    font-family: 'Crimson Pro', serif;
+    font-size: 13px;
+    padding: 6px 16px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+  .btn-reset:hover {
+    border-color: #6b3a2a;
+    color: #c8b89a;
+  }
+
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: rgba(30,22,14,0.9);
+    border: 1px solid rgba(107,58,42,0.25);
+    padding: 20px;
+    transition: border-color 0.3s;
+  }
+
+  .card.unlocked {
+    border-color: rgba(107,58,42,0.5);
+  }
+
+  .card-name {
+    font-family: 'IM Fell English', serif;
+    font-size: 17px;
+    color: #ddd0b8;
+    margin-bottom: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  .card-badges {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+  }
+
+  .badge-on      { color: #4a8a5a; border: 1px solid rgba(74,138,90,0.3); }
+  .badge-off     { color: #6a5a4a; border: 1px solid rgba(106,90,74,0.3); }
+  .badge-visited { color: #8a7a5a; border: 1px solid rgba(138,122,90,0.3); }
+
+  .card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    background: none;
+    border: 1px solid rgba(107,58,42,0.4);
+    color: #a89070;
+    font-family: 'Crimson Pro', serif;
+    font-size: 13px;
+    padding: 7px 14px;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: all 0.2s;
+    flex: 1;
+  }
+
+  .btn:hover:not(:disabled) {
+    border-color: #6b3a2a;
+    color: #ddd0b8;
+    background: rgba(107,58,42,0.1);
+  }
+
+  .btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .btn-unlock {
+    border-color: rgba(74,138,90,0.3);
+    color: #6a9a7a;
+  }
+  .btn-unlock:hover:not(:disabled) {
+    border-color: #4a8a5a;
+    color: #8aba9a;
+    background: rgba(74,138,90,0.08);
+  }
+
+  .status-bar {
+    text-align: center;
+    margin-top: 32px;
+    font-style: italic;
+    font-size: 12px;
+    color: rgba(107,58,42,0.5);
+    letter-spacing: 0.1em;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>PAINEL DO MESTRE</h1>
+  <p>Viksdal · controle de mapa em tempo real</p>
+</header>
+
+<div class="reset-bar">
+  <button class="btn-reset" onclick="window.resetAll()">↺ resetar sessão</button>
+</div>
+
+<div id="grid">
+  <p style="color:#6a5a4a;font-style:italic;grid-column:1/-1;text-align:center;padding:40px;">
+    Conectando ao Firebase...
+  </p>
+</div>
+
+<div class="status-bar">
+  alterações refletem no mapa da jogadora em tempo real
+</div>
+
+</body>
+</html>
