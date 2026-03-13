@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mestre, Documentos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0c0a;
+    --surface: #161410;
+    --border: #2a2520;
+    --accent: #8b4513;
+    --blood: #6b1a1a;
+    --green: #2a4a2a;
+    --green-text: #5a9a5a;
+    --text: #c8bfb0;
+    --text-dim: #5a5040;
+    --font: 'Courier Prime', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    padding: 30px 20px;
+  }
+
+  .master-header {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    margin-bottom: 35px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .master-header h1 {
+    font-size: 0.85em;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .master-header .session {
+    font-size: 0.7em;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+  }
+
+  .status-bar {
+    font-size: 0.65em;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-left: auto;
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+
+  .status-bar.connected {
+    border-color: var(--green);
+    color: var(--green-text);
+  }
+
+  /* GRID DE DOCUMENTOS */
+  .docs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    max-width: 1000px;
+  }
+
+  .doc-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+
+  .doc-card.revealed {
+    border-color: var(--accent);
+  }
+
+  .doc-card.revealed::before {
+    content: 'REVELADO';
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 0.6em;
+    letter-spacing: 0.2em;
+    color: var(--green-text);
+    opacity: 0.7;
+  }
+
+  .doc-title {
+    font-size: 0.8em;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .doc-location-label {
+    font-size: 0.65em;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .doc-preview {
+    font-size: 0.75em;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 18px;
+    font-style: italic;
+    border-left: 2px solid var(--border);
+    padding-left: 10px;
+  }
+
+  .doc-btn {
+    width: 100%;
+    padding: 10px;
+    font-family: var(--font);
+    font-size: 0.75em;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border: 1px solid;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+  }
+
+  .doc-btn.reveal {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .doc-btn.reveal:hover {
+    background: var(--accent);
+    color: #f0e8d8;
+  }
+
+  .doc-btn.hide {
+    border-color: var(--blood);
+    color: var(--blood);
+  }
+
+  .doc-btn.hide:hover {
+    background: var(--blood);
+    color: #f0e8d8;
+  }
+
+  /* SEÇÃO DE CONTROLES GLOBAIS */
+  .global-controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+  }
+
+  .global-btn {
+    padding: 8px 18px;
+    font-family: var(--font);
+    font-size: 0.7em;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .global-btn:hover {
+    border-color: var(--text-dim);
+    color: var(--text);
+  }
+
+  .global-btn.danger:hover {
+    border-color: var(--blood);
+    color: var(--blood);
+  }
+
+  /* ESTADO VISUAL DO CARD */
+  .doc-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    margin-right: 8px;
+    vertical-align: middle;
+    transition: background 0.3s;
+  }
+
+  .doc-card.revealed .doc-indicator {
+    background: var(--green-text);
+    box-shadow: 0 0 6px rgba(90,154,90,0.4);
+  }
+
+  /* LOG */
+  .log-section {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    max-width: 1000px;
+  }
+
+  .log-title {
+    font-size: 0.65em;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+
+  .log-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .log-item {
+    font-size: 0.7em;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .log-item .time {
+    color: var(--accent);
+    margin-right: 10px;
+    opacity: 0.6;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="master-header">
+  <h1>Viksdal, Mestre</h1>
+  <span class="session">documentos, sessão 1</span>
+  <span class="status-bar" id="status">conectando...</span>
+</div>
+
+<div class="global-controls">
+  <button class="global-btn" onclick="revealAll()">revelar todos</button>
+  <button class="global-btn danger" onclick="hideAll()">ocultar todos</button>
+</div>
+
+<div class="docs-grid" id="docs-grid">
+
+  <div class="doc-card" id="card-biblia" data-id="biblia">
+    <div class="doc-title"><span class="doc-indicator"></span>Éden, IV</div>
+    <span class="doc-location-label">Igrejinha, banco do fundo</span>
+    <div class="doc-preview">"O Jardim não tem mãos, mas planta. Não tem boca, mas alimenta..."</div>
+    <button class="doc-btn reveal" onclick="toggleDoc('biblia')">revelar para Alice</button>
+  </div>
+
+  <div class="doc-card" id="card-carta" data-id="carta">
+    <div class="doc-title"><span class="doc-indicator"></span>Carta de Ingrid</div>
+    <span class="doc-location-label">Casa de Ingrid, livro de receitas</span>
+    <div class="doc-preview">"Lembro quando você tinha oito anos e ficou três dias fotografando o quintal..."</div>
+    <button class="doc-btn reveal" onclick="toggleDoc('carta')">revelar para Alice</button>
+  </div>
+
+  <div class="doc-card" id="card-diario" data-id="diario">
+    <div class="doc-title"><span class="doc-indicator"></span>Diário de Ingrid</div>
+    <span class="doc-location-label">Casa de Ingrid, embaixo do colchão</span>
+    <div class="doc-preview">"Hoje sonhei com a árvore de novo. No sonho ela tinha raízes que chegavam..."</div>
+    <button class="doc-btn reveal" onclick="toggleDoc('diario')">revelar para Alice</button>
+  </div>
+
+  <div class="doc-card" id="card-frasco" data-id="frasco">
+    <div class="doc-title"><span class="doc-indicator"></span>Frasco de Ervas</div>
+    <span class="doc-location-label">Casa de Ingrid, prateleira da cozinha</span>
+    <div class="doc-preview">"Juuri muistaa sinut." Sem cheiro. Nenhum cheiro.</div>
+    <button class="doc-btn reveal" onclick="toggleDoc('frasco')">revelar para Alice</button>
+  </div>
+
+</div>
+
+<div class="log-section">
+  <div class="log-title">log da sessão</div>
+  <ul class="log-list" id="log-list"></ul>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBCYLeM-kzt-ranLjPpJKerO1K-nF0U7_0",
+    authDomain: "viksdal-rpg.firebaseapp.com",
+    databaseURL: "https://viksdal-rpg-default-rtdb.firebaseio.com",
+    projectId: "viksdal-rpg",
+    storageBucket: "viksdal-rpg.firebasestorage.app",
+    messagingSenderId: "259939315702",
+    appId: "1:259939315702:web:b599846c0fb7ac48c6e1d7"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const statusEl = document.getElementById('status');
+
+  const docIds = ['biblia', 'carta', 'diario', 'frasco'];
+  const state = {};
+
+  function addLog(msg) {
+    const list = document.getElementById('log-list');
+    const item = document.createElement('li');
+    item.className = 'log-item';
+    const now = new Date();
+    const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0') + ':' + now.getSeconds().toString().padStart(2,'0');
+    item.innerHTML = `<span class="time">${time}</span>${msg}`;
+    list.insertBefore(item, list.firstChild);
+    if (list.children.length > 20) list.removeChild(list.lastChild);
+  }
+
+  docIds.forEach(id => {
+    const r = ref(db, 'documentos/' + id + '/revealed');
+    onValue(r, (snap) => {
+      const revealed = snap.val() || false;
+      state[id] = revealed;
+      const card = document.getElementById('card-' + id);
+      const btn = card.querySelector('.doc-btn');
+      if (revealed) {
+        card.classList.add('revealed');
+        btn.textContent = 'ocultar de Alice';
+        btn.className = 'doc-btn hide';
+      } else {
+        card.classList.remove('revealed');
+        btn.textContent = 'revelar para Alice';
+        btn.className = 'doc-btn reveal';
+      }
+    });
+  });
+
+  statusEl.textContent = 'conectado';
+  statusEl.className = 'status-bar connected';
+
+  window.toggleDoc = function(id) {
+    const newState = !state[id];
+    set(ref(db, 'documentos/' + id + '/revealed'), newState);
+    const titles = {
+      biblia: 'Éden IV',
+      carta: 'Carta de Ingrid',
+      diario: 'Diário de Ingrid',
+      frasco: 'Frasco de Ervas'
+    };
+    addLog((newState ? 'revelado' : 'ocultado') + ': ' + titles[id]);
+  };
+
+  window.revealAll = function() {
+    docIds.forEach(id => set(ref(db, 'documentos/' + id + '/revealed'), true));
+    addLog('todos os documentos revelados');
+  };
+
+  window.hideAll = function() {
+    docIds.forEach(id => set(ref(db, 'documentos/' + id + '/revealed'), false));
+    addLog('todos os documentos ocultados');
+  };
+</script>
+</body>
+</html>
