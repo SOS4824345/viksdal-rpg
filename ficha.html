@@ -600,7 +600,6 @@
 
         function changeSanity(delta) { updateSanity(currentSanity + delta); }
 
-
         function updateSanityStatus() {
             const statusEl = document.getElementById('sanity-status');
             const body = document.body;
@@ -740,22 +739,18 @@
             }
             
             const newMaxFome = attrs.aguentar * 3;
-            if (newMaxFome !== maxFome) {
-                maxFome = newMaxFome;
-                document.getElementById('calc-fome-max').textContent = maxFome;
-                document.getElementById('fome-max-display').textContent = '/ ' + maxFome;
-                if (currentFome > maxFome) currentFome = maxFome;
-                updateFome(currentFome);
-            }
-            
+            maxFome = newMaxFome;
+            document.getElementById('calc-fome-max').textContent = maxFome;
+            document.getElementById('fome-max-display').textContent = '/ ' + maxFome;
+            if (currentFome > maxFome) currentFome = maxFome;
+            updateFome(currentFome);
+
             const newMaxSede = attrs.aguentar * 3;
-            if (newMaxSede !== maxSede) {
-                maxSede = newMaxSede;
-                document.getElementById('calc-sede-max').textContent = maxSede;
-                document.getElementById('sede-max-display').textContent = '/ ' + maxSede;
-                if (currentSede > maxSede) currentSede = maxSede;
-                updateSede(currentSede);
-            }
+            maxSede = newMaxSede;
+            document.getElementById('calc-sede-max').textContent = maxSede;
+            document.getElementById('sede-max-display').textContent = '/ ' + maxSede;
+            if (currentSede > maxSede) currentSede = maxSede;
+            updateSede(currentSede);
             
             document.getElementById('calc-pericias').textContent = attrs.ver + attrs.lembrar;
             document.getElementById('calc-resistencia').textContent = attrs.ceder * 3;
@@ -1069,18 +1064,14 @@
             calculateAll();
             initFilmSlots();
             updatePericiasUsed();
-            // Ajustar a foto inicial para ter o botão setimg
             const initialPhoto = document.querySelector('.photo-polaroid[data-id="0"]');
-            if (initialPhoto) {
-                initialPhoto.dataset.imgUrl = '';
-            }
+            if (initialPhoto) { initialPhoto.dataset.imgUrl = ''; }
         };
     </script>
 
-    <!-- FIREBASE SYNC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBCYLeM-kzt-ranLjPpJKerO1K-nF0U7_0",
@@ -1096,31 +1087,16 @@
         const db = getDatabase(app);
         const fichaRef = ref(db, 'ficha');
         const syncEl = document.getElementById('sync-status');
-
         let syncTimeout = null;
         let isSyncing = false;
 
         function setSyncStatus(status) {
-            if (status === 'ok') {
-                syncEl.textContent = '⬤ salvo';
-                syncEl.style.color = '#4a7c2e';
-                syncEl.style.borderColor = '#4a7c2e';
-            } else if (status === 'saving') {
-                syncEl.textContent = '⬤ salvando...';
-                syncEl.style.color = '#8b6914';
-                syncEl.style.borderColor = '#8b6914';
-            } else if (status === 'error') {
-                syncEl.textContent = '⬤ erro';
-                syncEl.style.color = '#7a1a1a';
-                syncEl.style.borderColor = '#7a1a1a';
-            } else {
-                syncEl.textContent = '⬤ offline';
-                syncEl.style.color = '#888';
-                syncEl.style.borderColor = '#ccc';
-            }
+            if (status === 'ok')     { syncEl.textContent = '⬤ salvo';       syncEl.style.color = '#4a7c2e'; syncEl.style.borderColor = '#4a7c2e'; }
+            else if (status === 'saving') { syncEl.textContent = '⬤ salvando...'; syncEl.style.color = '#8b6914'; syncEl.style.borderColor = '#8b6914'; }
+            else if (status === 'error')  { syncEl.textContent = '⬤ erro';        syncEl.style.color = '#7a1a1a'; syncEl.style.borderColor = '#7a1a1a'; }
+            else { syncEl.textContent = '⬤ offline'; syncEl.style.color = '#888'; syncEl.style.borderColor = '#ccc'; }
         }
 
-        // Expõe função de sync para o código principal
         window._scheduleSync = function() {
             clearTimeout(syncTimeout);
             syncTimeout = setTimeout(doSync, 800);
@@ -1131,8 +1107,7 @@
             isSyncing = true;
             setSyncStatus('saving');
             try {
-                const data = window.getSheetData();
-                await set(fichaRef, data);
+                await set(fichaRef, window.getSheetData());
                 setSyncStatus('ok');
             } catch(e) {
                 setSyncStatus('error');
@@ -1141,13 +1116,11 @@
             isSyncing = false;
         }
 
-        // Carrega do Firebase na inicialização
         async function loadFromFirebase() {
             try {
                 const snap = await get(fichaRef);
                 if (snap.exists()) {
-                    const data = snap.val();
-                    window.applySheetData(data);
+                    window.applySheetData(snap.val());
                     setSyncStatus('ok');
                 } else {
                     setSyncStatus('ok');
@@ -1158,9 +1131,6 @@
             }
         }
 
-        // Aguarda o onload principal e depois carrega do Firebase
-        window.addEventListener('load', () => {
-            setTimeout(loadFromFirebase, 200);
-        });
+        window.addEventListener('load', () => { setTimeout(loadFromFirebase, 200); });
     </script>
 </html>
