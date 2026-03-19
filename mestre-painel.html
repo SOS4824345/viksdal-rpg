@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mestre, Viksdal</title>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #090807;
+    --surface: #111009;
+    --surface2: #181510;
+    --border: #2a2318;
+    --border2: #3a3020;
+    --accent: #9b5a1a;
+    --accent2: #c47a2a;
+    --blood: #7a1a1a;
+    --blood2: #a02a2a;
+    --green: #1a3a1a;
+    --green2: #4a8a4a;
+    --blue2: #4a7aaa;
+    --text: #c8bfb0;
+    --text2: #8a8070;
+    --text3: #4a4038;
+    --font: 'Courier Prime', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 13px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    height: 48px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border2);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .topbar-title { font-size: 0.75em; letter-spacing: 0.4em; text-transform: uppercase; color: var(--accent2); }
+  .topbar-sep { color: var(--text3); }
+  .topbar-sub { font-size: 0.65em; letter-spacing: 0.2em; color: var(--text3); text-transform: uppercase; }
+
+  .topbar-clock {
+    margin-left: auto;
+    font-size: 1.1em;
+    letter-spacing: 0.15em;
+    color: var(--text);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .topbar-clock .periodo {
+    font-size: 0.6em;
+    letter-spacing: 0.2em;
+    color: var(--text3);
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border: 1px solid var(--border2);
+  }
+
+  /* LAYOUT PRINCIPAL */
+  .layout {
+    display: grid;
+    grid-template-columns: 200px 1fr 240px;
+    min-height: calc(100vh - 48px);
+  }
+
+  /* SIDEBAR ESQUERDA, LINKS */
+  .sidebar-left {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    overflow-y: auto;
+  }
+
+  .link-group { margin-bottom: 24px; }
+
+  .link-group-title {
+    font-size: 0.58em;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 0 16px;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .link-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    text-decoration: none;
+    color: var(--text2);
+    font-size: 0.72em;
+    letter-spacing: 0.05em;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+
+  .link-item:hover {
+    background: var(--surface2);
+    border-left-color: var(--accent);
+    color: var(--text);
+  }
+
+  .link-item .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text3);
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .link-item:hover .dot { background: var(--accent); }
+  .link-item.alice .dot { background: var(--blue2); opacity: 0.6; }
+  .link-item.mestre .dot { background: var(--accent); opacity: 0.6; }
+
+  .link-divider { height: 1px; background: var(--border); margin: 8px 16px; }
+
+  /* MAIN */
+  .main {
+    padding: 24px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    gap: 20px;
+  }
+
+  /* SEÇÃO DO RELÓGIO */
+  .clock-section {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 24px;
+    align-items: center;
+  }
+
+  .clock-wrap {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    flex-shrink: 0;
+  }
+
+  #clock-canvas {
+    width: 200px;
+    height: 200px;
+  }
+
+  .clock-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .hora-display {
+    font-size: 3em;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .hora-display .dia {
+    font-size: 0.35em;
+    color: var(--text3);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 400;
+  }
+
+  .horas-sem-dormir {
+    font-size: 0.68em;
+    color: var(--blood2);
+    letter-spacing: 0.1em;
+    padding: 4px 10px;
+    border: 1px solid rgba(160,42,42,0.3);
+    display: inline-block;
+    margin-bottom: 4px;
+  }
+
+  .btn-hora {
+    width: 100%;
+    padding: 12px;
+    font-family: var(--font);
+    font-size: 0.8em;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    background: rgba(155,90,26,0.15);
+    border: 1px solid var(--accent);
+    color: var(--accent2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-hora:hover {
+    background: rgba(155,90,26,0.3);
+    box-shadow: 0 0 15px rgba(155,90,26,0.2);
+  }
+
+  .btn-hora:active { transform: scale(0.98); }
+
+  .btn-dormir {
+    width: 100%;
+    padding: 8px;
+    font-family: var(--font);
+    font-size: 0.68em;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-dormir:hover {
+    border-color: var(--green2);
+    color: var(--green2);
+  }
+
+  .custos-hora {
+    font-size: 0.65em;
+    color: var(--text3);
+    line-height: 1.8;
+    padding: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .custos-hora span { color: var(--blood2); }
+
+  /* CLIMA */
+  .clima-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 16px;
+  }
+
+  .section-label {
+    font-size: 0.6em;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .clima-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .clima-btn {
+    padding: 10px 8px;
+    font-family: var(--font);
+    font-size: 0.65em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .clima-btn .clima-icon { font-size: 1.4em; display: block; margin-bottom: 4px; }
+  .clima-btn:hover { border-color: var(--text2); color: var(--text2); }
+
+  .clima-btn.active-noite    { border-color: #3a4a6a; color: #7a9aca; background: rgba(58,74,106,0.15); }
+  .clima-btn.active-amanhecer { border-color: #6a4a2a; color: #ca8a5a; background: rgba(106,74,42,0.15); }
+  .clima-btn.active-dia      { border-color: #4a5a3a; color: #8aaa6a; background: rgba(74,90,58,0.15); }
+  .clima-btn.active-anoitecer { border-color: #5a3a2a; color: #aa6a4a; background: rgba(90,58,42,0.15); }
+
+  /* RECURSOS AO VIVO */
+  .recursos-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 16px;
+  }
+
+  .recurso-row {
+    margin-bottom: 12px;
+  }
+
+  .recurso-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .recurso-nome { font-size: 0.65em; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; }
+  .recurso-val  { font-size: 0.7em; font-weight: 700; }
+
+  .recurso-bar-bg { height: 4px; background: var(--border); border-radius: 2px; }
+  .recurso-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+
+  .bar-san  { background: linear-gradient(90deg, var(--blood), #c07030); }
+  .bar-vida { background: linear-gradient(90deg, #2d5016, var(--green2)); }
+  .bar-fome { background: linear-gradient(90deg, #8b4513, #daa520); }
+  .bar-sede { background: linear-gradient(90deg, #1e3a5f, var(--blue2)); }
+
+  .recurso-btns { display: flex; gap: 4px; margin-top: 5px; }
+
+  .r-btn {
+    flex: 1;
+    padding: 3px;
+    font-family: var(--font);
+    font-size: 0.65em;
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .r-btn:hover { border-color: var(--accent); color: var(--accent2); }
+
+  /* SIDEBAR DIREITA */
+  .sidebar-right {
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .side-title {
+    font-size: 0.6em;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .side-sep { height: 1px; background: var(--border); margin: 14px 0; }
+
+  /* NOTAS */
+  .notes-area {
+    width: 100%;
+    min-height: 160px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 10px;
+    font-family: var(--font);
+    font-size: 0.72em;
+    color: var(--text2);
+    resize: vertical;
+    line-height: 1.6;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .notes-area:focus { border-color: var(--border2); }
+
+  /* LOG */
+  .log-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .log-item {
+    font-size: 0.65em;
+    color: var(--text3);
+    letter-spacing: 0.03em;
+    line-height: 1.5;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--border);
+    animation: logFade 0.3s ease;
+  }
+
+  @keyframes logFade {
+    from { opacity: 0; transform: translateX(-6px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .log-item .log-time { color: var(--accent); margin-right: 6px; }
+  .log-item .log-san  { color: var(--blood2); }
+  .log-item .log-ok   { color: var(--green2); }
+
+  /* EFEITO DE PULSO NO BOTÃO APÓS CLICAR */
+  @keyframes pulse-btn {
+    0%   { box-shadow: 0 0 0 0 rgba(155,90,26,0.4); }
+    70%  { box-shadow: 0 0 0 10px rgba(155,90,26,0); }
+    100% { box-shadow: 0 0 0 0 rgba(155,90,26,0); }
+  }
+
+  .btn-hora.pulsing { animation: pulse-btn 0.6s ease; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-title">Viksdal</span>
+  <span class="topbar-sep">/</span>
+  <span class="topbar-sub">Painel Mestre</span>
+  <div class="topbar-clock">
+    <span id="hora-digital">22:00</span>
+    <span class="periodo" id="periodo-label">Noite</span>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR ESQUERDA -->
+  <div class="sidebar-left">
+
+    <div class="link-group">
+      <span class="link-group-title">Alice</span>
+      <a class="link-item alice" href="https://sos4824345.github.io/viksdal-rpg/ficha.html" target="_blank">
+        <span class="dot"></span>Ficha da Mannon
+      </a>
+      <a class="link-item alice" href="https://sos4824345.github.io/viksdal-rpg/mapa.html" target="_blank">
+        <span class="dot"></span>Mapa de Viksdal
+      </a>
+      <a class="link-item alice" href="https://sos4824345.github.io/viksdal-rpg/casa.html" target="_blank">
+        <span class="dot"></span>Casa de Ingrid
+      </a>
+      <a class="link-item alice" href="https://sos4824345.github.io/viksdal-rpg/documentos.html" target="_blank">
+        <span class="dot"></span>Documentos
+      </a>
+    </div>
+
+    <div class="link-divider"></div>
+
+    <div class="link-group">
+      <span class="link-group-title">Mestre</span>
+      <a class="link-item mestre" href="https://sos4824345.github.io/viksdal-rpg/mestre-sessao1.html" target="_blank">
+        <span class="dot"></span>Painel Sessão 1
+      </a>
+      <a class="link-item mestre" href="https://sos4824345.github.io/viksdal-rpg/mestre.html" target="_blank">
+        <span class="dot"></span>Mapa (controle)
+      </a>
+      <a class="link-item mestre" href="https://sos4824345.github.io/viksdal-rpg/mestre-casa.html" target="_blank">
+        <span class="dot"></span>Casa (controle)
+      </a>
+      <a class="link-item mestre" href="https://sos4824345.github.io/viksdal-rpg/mestre-documentos.html" target="_blank">
+        <span class="dot"></span>Documentos (controle)
+      </a>
+    </div>
+
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- RELÓGIO + CONTROLES -->
+    <div class="clock-section">
+      <div class="clock-wrap">
+        <canvas id="clock-canvas" width="200" height="200"></canvas>
+      </div>
+      <div class="clock-controls">
+        <div class="hora-display">
+          <span class="dia" id="dia-label">Dia 1, Viksdal</span>
+          <span id="hora-grande">22:00</span>
+        </div>
+        <div class="horas-sem-dormir" id="sem-dormir-label">0h sem dormir</div>
+        <button class="btn-hora" id="btn-avancar" onclick="avancarHora()">
+          ▶ Avançar 1 Hora
+        </button>
+        <button class="btn-dormir" onclick="dormirMannon()">
+          ☽ Mannon dorme (resetar sono)
+        </button>
+        <div class="custos-hora">
+          A cada hora: <span>-1 Fome, -1 Sede</span><br>
+          A cada 3h sem dormir: <span>-1 Sanidade</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLIMA -->
+    <div class="clima-section">
+      <span class="section-label">Condição Ambiente</span>
+      <div class="clima-grid">
+        <button class="clima-btn" id="clima-noite" onclick="setClima('noite')">
+          <span class="clima-icon">🌑</span>Noite Fechada
+        </button>
+        <button class="clima-btn" id="clima-amanhecer" onclick="setClima('amanhecer')">
+          <span class="clima-icon">🌅</span>Amanhecer
+        </button>
+        <button class="clima-btn" id="clima-dia" onclick="setClima('dia')">
+          <span class="clima-icon">☁️</span>Dia Nublado
+        </button>
+        <button class="clima-btn" id="clima-anoitecer" onclick="setClima('anoitecer')">
+          <span class="clima-icon">🌆</span>Anoitecer
+        </button>
+      </div>
+    </div>
+
+    <!-- RECURSOS AO VIVO -->
+    <div class="recursos-section">
+      <span class="section-label">Mannon, Recursos ao Vivo</span>
+
+      <div class="recurso-row">
+        <div class="recurso-header">
+          <span class="recurso-nome">Sanidade</span>
+          <span class="recurso-val" id="r-san" style="color:#a02a2a;">20 / 20</span>
+        </div>
+        <div class="recurso-bar-bg"><div class="recurso-bar-fill bar-san" id="b-san" style="width:100%"></div></div>
+        <div class="recurso-btns">
+          <button class="r-btn" onclick="ajustar('sanidade',-1)">-1</button>
+          <button class="r-btn" onclick="ajustar('sanidade',-3)">-3</button>
+          <button class="r-btn" onclick="ajustar('sanidade',-5)">-5</button>
+          <button class="r-btn" onclick="ajustar('sanidade',1)">+1</button>
+          <button class="r-btn" onclick="ajustar('sanidade',3)">+3</button>
+        </div>
+      </div>
+
+      <div class="recurso-row">
+        <div class="recurso-header">
+          <span class="recurso-nome">Vida</span>
+          <span class="recurso-val" id="r-vida" style="color:#4a8a4a;">6 / 6</span>
+        </div>
+        <div class="recurso-bar-bg"><div class="recurso-bar-fill bar-vida" id="b-vida" style="width:100%"></div></div>
+        <div class="recurso-btns">
+          <button class="r-btn" onclick="ajustar('vida',-1)">-1</button>
+          <button class="r-btn" onclick="ajustar('vida',-2)">-2</button>
+          <button class="r-btn" onclick="ajustar('vida',-5)">-5</button>
+          <button class="r-btn" onclick="ajustar('vida',1)">+1</button>
+        </div>
+      </div>
+
+      <div class="recurso-row">
+        <div class="recurso-header">
+          <span class="recurso-nome">Saciedade</span>
+          <span class="recurso-val" id="r-fome" style="color:#daa520;">6 / 6</span>
+        </div>
+        <div class="recurso-bar-bg"><div class="recurso-bar-fill bar-fome" id="b-fome" style="width:100%"></div></div>
+        <div class="recurso-btns">
+          <button class="r-btn" onclick="ajustar('fome',-1)">-1</button>
+          <button class="r-btn" onclick="ajustar('fome',1)">+1</button>
+          <button class="r-btn" onclick="ajustar('fome',3)">+3</button>
+        </div>
+      </div>
+
+      <div class="recurso-row">
+        <div class="recurso-header">
+          <span class="recurso-nome">Hidratação</span>
+          <span class="recurso-val" id="r-sede" style="color:#4a7aaa;">6 / 6</span>
+        </div>
+        <div class="recurso-bar-bg"><div class="recurso-bar-fill bar-sede" id="b-sede" style="width:100%"></div></div>
+        <div class="recurso-btns">
+          <button class="r-btn" onclick="ajustar('sede',-1)">-1</button>
+          <button class="r-btn" onclick="ajustar('sede',1)">+1</button>
+          <button class="r-btn" onclick="ajustar('sede',3)">+3</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- SIDEBAR DIREITA -->
+  <div class="sidebar-right">
+
+    <span class="side-title">Notas Rápidas</span>
+    <textarea class="notes-area" id="notas" placeholder="Anotações da sessão, pistas, nomes, ideias..."></textarea>
+
+    <div class="side-sep"></div>
+
+    <span class="side-title">Log de Eventos</span>
+    <ul class="log-list" id="log-list"></ul>
+
+  </div>
+
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBCYLeM-kzt-ranLjPpJKerO1K-nF0U7_0",
+    authDomain: "viksdal-rpg.firebaseapp.com",
+    databaseURL: "https://viksdal-rpg-default-rtdb.firebaseio.com",
+    projectId: "viksdal-rpg",
+    storageBucket: "viksdal-rpg.firebasestorage.app",
+    messagingSenderId: "259939315702",
+    appId: "1:259939315702:web:b599846c0fb7ac48c6e1d7"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Estado local
+  let horaAtual = 22;
+  let diaAtual = 1;
+  let horasSemDormir = 0;
+  let climaAtual = 'noite';
+  let fichaData = {};
+
+  // Refs Firebase
+  const tempoRef  = ref(db, 'tempo');
+  const fichaRef  = ref(db, 'ficha');
+
+  // ===== RELÓGIO ANALÓGICO =====
+  const canvas = document.getElementById('clock-canvas');
+  const ctx = canvas.getContext('2d');
+
+  function drawClock(hora) {
+    const W = 200, H = 200, cx = W/2, cy = H/2, r = 88;
+    ctx.clearRect(0, 0, W, H);
+
+    // Fundo
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI*2);
+    ctx.fillStyle = '#0e0c0a';
+    ctx.fill();
+    ctx.strokeStyle = '#3a3020';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Aro externo
+    ctx.beginPath();
+    ctx.arc(cx, cy, r - 4, 0, Math.PI*2);
+    ctx.strokeStyle = '#2a2318';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Marcações das horas
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2 - Math.PI/2;
+      const isMain = i % 3 === 0;
+      const len = isMain ? 12 : 6;
+      const x1 = cx + Math.cos(angle) * (r - 10);
+      const y1 = cy + Math.sin(angle) * (r - 10);
+      const x2 = cx + Math.cos(angle) * (r - 10 - len);
+      const y2 = cy + Math.sin(angle) * (r - 10 - len);
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.strokeStyle = isMain ? '#6a5a40' : '#3a3020';
+      ctx.lineWidth = isMain ? 2 : 1;
+      ctx.stroke();
+    }
+
+    // Hora no formato 12h
+    const h12 = hora % 12;
+    const hAngle = (h12 / 12) * Math.PI * 2 - Math.PI/2;
+    const mAngle = -Math.PI/2; // sem minutos reais
+
+    // Ponteiro das horas
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(hAngle) * (r * 0.55), cy + Math.sin(hAngle) * (r * 0.55));
+    ctx.strokeStyle = '#c8bfb0';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // Ponteiro dos minutos (fixo em 00)
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(mAngle) * (r * 0.75), cy + Math.sin(mAngle) * (r * 0.75));
+    ctx.strokeStyle = '#8a8070';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // Centro
+    ctx.beginPath();
+    ctx.arc(cx, cy, 4, 0, Math.PI*2);
+    ctx.fillStyle = '#9b5a1a';
+    ctx.fill();
+  }
+
+  function formatHora(h) {
+    return String(h % 24).padStart(2, '0') + ':00';
+  }
+
+  function getPeriodo(h) {
+    const hh = h % 24;
+    if (hh >= 5  && hh < 8)  return { label: 'Amanhecer', clima: 'amanhecer' };
+    if (hh >= 8  && hh < 18) return { label: 'Dia',       clima: 'dia' };
+    if (hh >= 18 && hh < 21) return { label: 'Anoitecer', clima: 'anoitecer' };
+    return { label: 'Noite', clima: 'noite' };
+  }
+
+  function updateClockUI(hora, dia, semDormir) {
+    const hf = formatHora(hora);
+    drawClock(hora);
+    document.getElementById('hora-digital').textContent = hf;
+    document.getElementById('hora-grande').textContent = hf;
+    document.getElementById('dia-label').textContent = 'Dia ' + dia + ', Viksdal';
+    document.getElementById('sem-dormir-label').textContent = semDormir + 'h sem dormir';
+    const p = getPeriodo(hora);
+    document.getElementById('periodo-label').textContent = p.label;
+  }
+
+  // ===== CLIMA =====
+  function updateClimaUI(clima) {
+    climaAtual = clima;
+    const btns = ['noite','amanhecer','dia','anoitecer'];
+    btns.forEach(c => {
+      const btn = document.getElementById('clima-' + c);
+      btn.className = 'clima-btn';
+      if (c === clima) btn.classList.add('active-' + c);
+    });
+  }
+
+  // ===== RECURSOS =====
+  function updateRecursosUI(recursos) {
+    fichaData = recursos || {};
+    const san  = recursos.sanidade   ?? 20;
+    const mSan = recursos.maxSanidade ?? 20;
+    const vid  = recursos.vida        ?? 6;
+    const mVid = recursos.maxVida     ?? 6;
+    const fom  = recursos.fome        ?? 6;
+    const mFom = recursos.maxFome     ?? 6;
+    const sed  = recursos.sede        ?? 6;
+    const mSed = recursos.maxSede     ?? 6;
+
+    document.getElementById('r-san').textContent  = san  + ' / ' + mSan;
+    document.getElementById('r-vida').textContent = vid  + ' / ' + mVid;
+    document.getElementById('r-fome').textContent = fom  + ' / ' + mFom;
+    document.getElementById('r-sede').textContent = sed  + ' / ' + mSed;
+
+    document.getElementById('b-san').style.width  = pct(san, mSan);
+    document.getElementById('b-vida').style.width = pct(vid, mVid);
+    document.getElementById('b-fome').style.width = pct(fom, mFom);
+    document.getElementById('b-sede').style.width = pct(sed, mSed);
+  }
+
+  function pct(v, m) { return (m > 0 ? Math.round((v/m)*100) : 0) + '%'; }
+
+  // ===== LISTENERS FIREBASE =====
+  onValue(tempoRef, snap => {
+    if (!snap.exists()) {
+      // Inicializa se não existir
+      set(tempoRef, { hora: 22, dia: 1, horasSemDormir: 0, clima: 'noite' });
+      return;
+    }
+    const t = snap.val();
+    horaAtual       = t.hora ?? 22;
+    diaAtual        = t.dia ?? 1;
+    horasSemDormir  = t.horasSemDormir ?? 0;
+    climaAtual      = t.clima ?? 'noite';
+    updateClockUI(horaAtual, diaAtual, horasSemDormir);
+    updateClimaUI(climaAtual);
+  });
+
+  onValue(ref(db, 'ficha/recursos'), snap => {
+    if (snap.exists()) updateRecursosUI(snap.val());
+  });
+
+  // ===== AVANÇAR HORA =====
+  window.avancarHora = async function() {
+    const btn = document.getElementById('btn-avancar');
+    btn.classList.add('pulsing');
+    setTimeout(() => btn.classList.remove('pulsing'), 600);
+
+    const snap = await get(fichaRef);
+    const recursos = snap.exists() ? (snap.val().recursos || {}) : {};
+
+    const novaHora = (horaAtual + 1) % 24;
+    const novoDia  = novaHora === 0 ? diaAtual + 1 : diaAtual;
+    const novoSemDormir = horasSemDormir + 1;
+
+    // Calcular custos
+    let novaFome = Math.max(0, (recursos.fome ?? 6) - 1);
+    let novaSede = Math.max(0, (recursos.sede ?? 6) - 1);
+    let novaSan  = recursos.sanidade ?? 20;
+    const maxSan = recursos.maxSanidade ?? 20;
+
+    let sanPerdida = 0;
+    if (novoSemDormir % 3 === 0 && novoSemDormir > 0) {
+      sanPerdida = 1;
+      novaSan = Math.max(0, novaSan - 1);
+    }
+
+    // Detecta clima automático se não foi override manual
+    const periodoAuto = getPeriodo(novaHora).clima;
+
+    // Atualiza Firebase
+    await update(tempoRef, {
+      hora: novaHora,
+      dia: novoDia,
+      horasSemDormir: novoSemDormir,
+      clima: periodoAuto
+    });
+
+    await update(ref(db, 'ficha/recursos'), {
+      fome: novaFome,
+      sede: novaSede,
+      sanidade: novaSan
+    });
+
+    // Log
+    let logMsg = `hora avançou para ${String(novaHora).padStart(2,'0')}:00`;
+    if (novaFome === 0) logMsg += ', <span class="log-san">fome crítica</span>';
+    if (novaSede === 0) logMsg += ', <span class="log-san">sede crítica</span>';
+    if (sanPerdida > 0) logMsg += ', <span class="log-san">-1 SAN (sono)</span>';
+    addLog(logMsg);
+  };
+
+  // ===== DORMIR =====
+  window.dormirMannon = async function() {
+    await update(tempoRef, { horasSemDormir: 0 });
+    addLog('<span class="log-ok">Mannon dormiu, contador de sono resetado</span>');
+  };
+
+  // ===== CLIMA MANUAL =====
+  window.setClima = async function(clima) {
+    await update(tempoRef, { clima });
+    addLog('clima alterado: ' + clima);
+  };
+
+  // ===== AJUSTAR RECURSOS =====
+  window.ajustar = async function(campo, delta) {
+    const snap = await get(ref(db, 'ficha/recursos'));
+    const r = snap.exists() ? snap.val() : {};
+    const maxMap = { sanidade: r.maxSanidade ?? 20, vida: r.maxVida ?? 6, fome: r.maxFome ?? 6, sede: r.maxSede ?? 6 };
+    const atual = r[campo] ?? maxMap[campo];
+    const novo = Math.max(0, Math.min(maxMap[campo], atual + delta));
+    await update(ref(db, 'ficha/recursos'), { [campo]: novo });
+    const sinal = delta > 0 ? '+' : '';
+    addLog(`${campo}: ${atual} ${sinal}${delta} = <span class="${delta < 0 ? 'log-san' : 'log-ok'}">${novo}</span>`);
+  };
+
+  // ===== LOG =====
+  function addLog(msg) {
+    const list = document.getElementById('log-list');
+    const item = document.createElement('li');
+    item.className = 'log-item';
+    const now = new Date();
+    const time = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    item.innerHTML = `<span class="log-time">${time}</span>${msg}`;
+    list.insertBefore(item, list.firstChild);
+    if (list.children.length > 30) list.removeChild(list.lastChild);
+  }
+
+  // ===== NOTAS (salva local) =====
+  const notasEl = document.getElementById('notas');
+  const notasSalvas = localStorage.getItem('viksdal-notas');
+  if (notasSalvas) notasEl.value = notasSalvas;
+  notasEl.addEventListener('input', () => {
+    localStorage.setItem('viksdal-notas', notasEl.value);
+  });
+
+  // Init relógio
+  drawClock(22);
+</script>
+</body>
+</html>

@@ -50,6 +50,49 @@
         h1 { font-size: 3em; letter-spacing: 0.3em; font-weight: 400; text-transform: uppercase; margin-bottom: 10px; font-family: 'Courier Prime', monospace; }
         .subtitle { font-style: italic; font-size: 1.2em; opacity: 0.8; letter-spacing: 0.1em; }
 
+        /* BARRA DE ATMOSFERA */
+        .atmosfera-bar {
+            height: 4px;
+            width: 100%;
+            transition: background 3s ease;
+            background: linear-gradient(90deg, #0a0a12, #1a1a2a);
+        }
+
+        /* RELÓGIO NA FICHA */
+        .viksdal-clock {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+        }
+
+        .viksdal-clock .clock-hora {
+            font-family: 'Courier Prime', monospace;
+            font-size: 1.4em;
+            letter-spacing: 0.1em;
+            color: rgba(245,245,240,0.7);
+            font-weight: 700;
+        }
+
+        .viksdal-clock .clock-periodo {
+            font-family: 'Courier Prime', monospace;
+            font-size: 0.6em;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: rgba(245,245,240,0.3);
+        }
+
+        .viksdal-clock .clock-dia {
+            font-family: 'Courier Prime', monospace;
+            font-size: 0.55em;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: rgba(245,245,240,0.2);
+        }
+
         .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
         .left-column, .right-column { padding: 30px; }
         .left-column { border-right: 1px solid rgba(0,0,0,0.1); }
@@ -222,12 +265,18 @@
     </style>
 </head>
 <body data-sanity="high">
+    <div class="atmosfera-bar" id="atmosfera-bar"></div>
     <div class="container">
         <div class="stain stain-1"></div>
         <div class="stain stain-2"></div>
         <div class="stain stain-3"></div>
 
         <header>
+            <div class="viksdal-clock">
+                <span class="clock-hora" id="ficha-hora">22:00</span>
+                <span class="clock-periodo" id="ficha-periodo">Noite</span>
+                <span class="clock-dia" id="ficha-dia">Dia 1</span>
+            </div>
             <h1>MANNON</h1>
             <div class="subtitle">Ficha de Personagem • RPG de Mesa Solo</div>
         </header>
@@ -1071,7 +1120,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+        import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBCYLeM-kzt-ranLjPpJKerO1K-nF0U7_0",
@@ -1089,6 +1138,35 @@
         const syncEl = document.getElementById('sync-status');
         let syncTimeout = null;
         let isSyncing = false;
+
+        // ===== LISTENER DE TEMPO =====
+        const climaAtmosferas = {
+            noite:     { bar: 'linear-gradient(90deg, #050508, #0a0a15)', periodo: 'Noite' },
+            amanhecer: { bar: 'linear-gradient(90deg, #1a0a05, #2a1508)', periodo: 'Amanhecer' },
+            dia:       { bar: 'linear-gradient(90deg, #0a1005, #101508)', periodo: 'Dia' },
+            anoitecer: { bar: 'linear-gradient(90deg, #150a05, #200f08)', periodo: 'Anoitecer' }
+        };
+
+        onValue(ref(db, 'tempo'), (snap) => {
+            if (!snap.exists()) return;
+            const t = snap.val();
+            const hora = t.hora ?? 22;
+            const dia  = t.dia ?? 1;
+            const clima = t.clima ?? 'noite';
+
+            const hf = String(hora % 24).padStart(2,'0') + ':00';
+            const atm = climaAtmosferas[clima] || climaAtmosferas.noite;
+
+            const elHora    = document.getElementById('ficha-hora');
+            const elPeriodo = document.getElementById('ficha-periodo');
+            const elDia     = document.getElementById('ficha-dia');
+            const elBar     = document.getElementById('atmosfera-bar');
+
+            if (elHora)    elHora.textContent    = hf;
+            if (elPeriodo) elPeriodo.textContent  = atm.periodo;
+            if (elDia)     elDia.textContent      = 'Dia ' + dia;
+            if (elBar)     elBar.style.background = atm.bar;
+        });
 
         function setSyncStatus(status) {
             if (status === 'ok')     { syncEl.textContent = '⬤ salvo';       syncEl.style.color = '#4a7c2e'; syncEl.style.borderColor = '#4a7c2e'; }
